@@ -16,6 +16,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     let { email, token } = body;
 
+    // Log the received data for debugging
+    console.log("Received resubscribe data:", { email, token });
+
     if (!email || !token) {
       console.log("Missing email or token in request");
       return NextResponse.json(
@@ -32,35 +35,45 @@ export async function POST(request: Request) {
     console.log("- Email:", email);
     console.log("- Token:", token);
 
-    // First check if the email and token combination exists
-    const { data: subscribers, error: fetchError } = await supabase
+    // First check if the email exists (separately from token check)
+    const { data: emailCheck, error: emailError } = await supabase
       .from("subscribers")
-      .select("id, email, subscribed, name")
+      .select("id, email, subscribed, unsubscribe_token")
       .eq("email", email)
-      .eq("unsubscribe_token", token);
+      .single();
 
-    if (fetchError) {
-      console.error("Error fetching subscriber data:", fetchError);
+    if (emailError) {
+      console.error("Error checking email existence:", emailError);
+
+      // If the error is 'not found', give a specific message
+      if (emailError.code === "PGRST116") {
+        return NextResponse.json(
+          { error: "Email not found in our records" },
+          { status: 404 }
+        );
+      }
+
       return NextResponse.json(
-        { error: "Database error", details: fetchError.message },
+        { error: "Database error", details: emailError.message },
         { status: 500 }
       );
     }
 
-    // If no matching records found
-    if (!subscribers || subscribers.length === 0) {
-      console.log("No matching subscriber found with email and token");
+    // Now we have the subscriber record - check if token matches
+    console.log("Found subscriber:", emailCheck.id);
+    console.log("Expected token:", emailCheck.unsubscribe_token);
+    console.log("Provided token:", token);
+
+    if (emailCheck.unsubscribe_token !== token) {
+      console.log("Token mismatch for subscriber:", emailCheck.id);
       return NextResponse.json(
-        { error: "Invalid or expired token" },
+        { error: "Invalid verification token" },
         { status: 401 }
       );
     }
 
-    const subscriber = subscribers[0];
-    console.log("Found matching subscriber:", subscriber.id);
-
     // Check if already subscribed
-    if (subscriber.subscribed === true) {
+    if (emailCheck.subscribed === true) {
       console.log("Subscriber already active");
       return NextResponse.json({
         success: true,
@@ -82,7 +95,7 @@ export async function POST(request: Request) {
     const { error: updateError } = await supabase
       .from("subscribers")
       .update(updateData)
-      .eq("id", subscriber.id);
+      .eq("id", emailCheck.id);
 
     if (updateError) {
       console.error("Error updating subscriber:", updateError);
@@ -95,14 +108,27 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Successfully reactivated subscriber:", subscriber.id);
+    console.log("Successfully reactivated subscriber:", emailCheck.id);
+
+    // Fetch complete subscriber data for email
+    const { data: subscriber, error: fetchError } = await supabase
+      .from("subscribers")
+      .select("id, email, name, subscribed")
+      .eq("id", emailCheck.id)
+      .single();
+
+    if (fetchError) {
+      console.error("Error fetching updated subscriber data:", fetchError);
+      // Continue anyway since the subscription is already updated
+    }
 
     // Send confirmation email if Resend is initialized
     if (resend) {
       try {
+        const subscriberName = subscriber?.name || "";
         const emailComponent = ResubscribeEmail({
           email,
-          name: subscriber.name || "",
+          name: subscriberName,
         }) as React.ReactElement;
 
         await resend.emails.send({
