@@ -1,5 +1,4 @@
 // app/api/resubscribe/route.ts
-//xx
 import { NextResponse } from "next/server";
 import supabase from "../../../Services/supabase";
 import { Resend } from "resend";
