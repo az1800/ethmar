@@ -9,21 +9,44 @@ const resendApiKey = process.env.RESEND_API_KEY || "";
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function POST(request: Request) {
-  console.log("=== RESUBSCRIBE API ROUTE START ===");
+  // Enhanced error response function
+  const errorResponse = (
+    message: string,
+    details: any,
+    status: number = 500
+  ) => {
+    return NextResponse.json(
+      {
+        error: message,
+        details: details,
+        timestamp: new Date().toISOString(),
+        url: request.url,
+        diagnosticMode: true,
+      },
+      { status }
+    );
+  };
 
   try {
-    console.log("Parsing request body...");
     // Parse the request body
-    const body = await request.json();
-    console.log("Received body:", body);
+    let body;
+    try {
+      body = await request.json();
+    } catch (parseError) {
+      return errorResponse(
+        "Failed to parse request body",
+        { parseError: String(parseError) },
+        400
+      );
+    }
 
     let { email, token } = body;
 
     if (!email || !token) {
-      console.log("Missing email or token in request");
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+      return errorResponse(
+        "Missing required fields",
+        { providedFields: { email: !!email, token: !!token } },
+        400
       );
     }
 
@@ -31,82 +54,88 @@ export async function POST(request: Request) {
     email = email.trim().toLowerCase();
     token = token.trim();
 
-    console.log("Processing resubscribe request with cleaned data:");
-    console.log("- Email:", email);
-    console.log("- Token:", token);
-
-    console.log("Querying Supabase...");
     // First check if the email and token combination exists
-    const { data: subscribers, error: fetchError } = await supabase
-      .from("subscribers")
-      .select("id, email, subscribed")
-      .eq("email", email)
-      .eq("unsubscribe_token", token);
+    let subscribers;
+    let fetchError;
 
-    console.log("Supabase query result:", { subscribers, error: fetchError });
+    try {
+      const result = await supabase
+        .from("subscribers")
+        .select("id, email, subscribed")
+        .eq("email", email)
+        .eq("unsubscribe_token", token);
+
+      subscribers = result.data;
+      fetchError = result.error;
+    } catch (supabaseError) {
+      return errorResponse(
+        "Supabase query failed",
+        { supabaseError: String(supabaseError) },
+        500
+      );
+    }
 
     if (fetchError) {
-      console.error("Error fetching subscriber data:", fetchError);
-      return NextResponse.json(
-        { error: "Database error", details: fetchError.message },
-        { status: 500 }
-      );
+      return errorResponse("Database error during fetch", fetchError, 500);
     }
 
     // If no matching records found
     if (!subscribers || subscribers.length === 0) {
-      console.log("No matching subscriber found with email and token");
-      return NextResponse.json(
-        { error: "Invalid or expired token" },
-        { status: 401 }
+      return errorResponse(
+        "Invalid or expired token",
+        { email, tokenFirstChars: token.substring(0, 8) + "..." },
+        401
       );
     }
 
     const subscriber = subscribers[0];
-    console.log("Found matching subscriber:", subscriber);
 
     // Only attempt to resubscribe if currently unsubscribed
     if (subscriber.subscribed) {
-      console.log("Subscriber is already active:", subscriber.id);
       return NextResponse.json({
         success: true,
         message: "أنت مشترك بالفعل في نشرة إثمار الإخبارية.",
       });
     }
 
-    // Prepare update data for resubscribing - only using subscribed and unsubscribed_at
+    // Prepare update data for resubscribing
     const updateData = {
       subscribed: true,
-      unsubscribed_at: null, // Clear the unsubscribe timestamp
+      unsubscribed_at: null,
     };
 
-    console.log("Updating subscriber with data:", updateData);
-
     // Update the specific record by ID for more reliability
-    const { error: updateError } = await supabase
-      .from("subscribers")
-      .update(updateData)
-      .eq("id", subscriber.id);
+    let updateError;
 
-    console.log("Update result error:", updateError);
+    try {
+      const updateResult = await supabase
+        .from("subscribers")
+        .update(updateData)
+        .eq("id", subscriber.id);
 
-    if (updateError) {
-      console.error("Error updating subscriber:", updateError);
-      return NextResponse.json(
-        {
-          error: "Failed to update subscription status",
-          details: updateError.message,
-        },
-        { status: 500 }
+      updateError = updateResult.error;
+    } catch (supabaseUpdateError) {
+      return errorResponse(
+        "Supabase update operation failed",
+        { supabaseUpdateError: String(supabaseUpdateError) },
+        500
       );
     }
 
-    console.log("Successfully resubscribed subscriber:", subscriber.id);
+    if (updateError) {
+      return errorResponse(
+        "Failed to update subscription status",
+        updateError,
+        500
+      );
+    }
 
     // Send confirmation email if Resend is initialized
+    let emailSent = false;
+    let emailError = null;
+
     if (resend) {
       try {
-        console.log("Attempting to send confirmation email");
         const emailComponent = ResubscribeEmail({
           email,
         }) as React.ReactElement;
@@ -118,31 +147,28 @@ export async function POST(request: Request) {
           react: emailComponent,
         });
 
-        console.log("Sent resubscribe confirmation email to:", email);
-      } catch (emailError) {
-        console.error("Failed to send confirmation email:", emailError);
+        emailSent = true;
+      } catch (sendError) {
+        emailError = sendError;
+        // Continue execution even if email fails
       }
-    } else {
-      console.warn(
-        "Resend API key not configured. Skipping confirmation email."
-      );
     }
 
     // Return success response
-    console.log("Returning success response");
     return NextResponse.json({
       success: true,
       message: "تم إعادة تفعيل اشتراكك بنجاح!",
+      emailSent,
+      emailError: emailError ? String(emailError) : null,
     });
   } catch (error) {
-    console.error("CRITICAL ERROR in resubscribe process:", {
-      message: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : "",
-    });
-
-    return NextResponse.json(
-      { error: "حدث خطأ أثناء إعادة الاشتراك" },
-      { status: 500 }
+    return errorResponse(
+      "Unhandled exception in resubscribe process",
+      {
+        message: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined,
+      },
+      500
     );
   }
 }
