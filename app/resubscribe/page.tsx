@@ -20,7 +20,6 @@ export default function ResubscribePage() {
         const url = new URL(window.location.href);
         const emailParam = url.searchParams.get("email");
         const tokenParam = url.searchParams.get("token");
-
         // Add debug info
         setDebugInfo({
           rawUrl: window.location.href,
@@ -265,19 +264,6 @@ export default function ResubscribePage() {
             </a>
           </p>
         </div>
-
-        {/* Debug Information (only shown in development) */}
-        {process.env.NODE_ENV === "development" && debugInfo && (
-          <div
-            className="mt-8 p-4 bg-gray-100 rounded-md text-xs text-left"
-            dir="ltr"
-          >
-            <h4 className="font-bold mb-2">Debug Info:</h4>
-            <pre className="overflow-auto">
-              {JSON.stringify(debugInfo, null, 2)}
-            </pre>
-          </div>
-        )}
       </div>
     </div>
   );
