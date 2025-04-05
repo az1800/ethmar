@@ -2,6 +2,14 @@
 import { NextResponse } from "next/server";
 import supabase from "../../../Services/supabase";
 
+// Define types for subscriber check to avoid TypeScript errors
+type SubscriberCheckResult =
+  | { status: "not_attempted" }
+  | { status: "error"; error: string }
+  | { status: "not_found"; message: string }
+  | { status: "found"; subscriberId: string; currentlySubscribed: boolean }
+  | { status: "exception"; error: string };
+
 // Add a basic health check endpoint that can be used to test API functionality
 export async function GET(request: Request) {
   try {
@@ -56,7 +64,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         status: "API error",
-        error: error instanceof Error ? error.message : String(error),
+        errorMessage: error instanceof Error ? error.message : String(error),
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
@@ -85,7 +93,7 @@ export async function POST(request: Request) {
     };
 
     // Second test - check if subscriber exists without making changes
-    let subscriberCheck = { status: "not_attempted" };
+    let subscriberCheck: SubscriberCheckResult = { status: "not_attempted" };
 
     if (email && token) {
       try {
@@ -130,7 +138,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         status: "error",
-        error: error instanceof Error ? error.message : String(error),
+        errorMessage: error instanceof Error ? error.message : String(error),
         timestamp: new Date().toISOString(),
       },
       { status: 500 }
