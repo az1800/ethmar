@@ -360,62 +360,55 @@ export default function ResubscribePage() {
     setStatus("loading");
 
     try {
-      // Log the request data
-      const requestData = { email, token };
-      setDebugInfo((prev: any) => ({
-        ...prev,
-        requestData,
-      }));
-
-      // Time the request for debugging
-      const requestStartTime = Date.now();
-
-      // Make the API request
-      const response = await fetch("/api/resubscribe", {
+      // Use diagnostic API with update flag
+      const response = await fetch("/api/diagnose", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({
+          email,
+          token,
+          performUpdate: true,
+        }),
       });
 
-      const requestDuration = Date.now() - requestStartTime;
-
-      // Try to get response as text first to safely handle any response format
-      const responseText = await response.text();
-
-      // Try to parse as JSON if possible
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        setDebugInfo((prev: any) => ({
-          ...prev,
-          responseStatus: response.status,
-          responseText,
-          parseError: String(parseError),
-          requestDuration,
-        }));
-
-        setStatus("error");
-        setMessage("خطأ في تنسيق الاستجابة من الخادم");
-        return;
-      }
+      // Get the response data
+      const data = await response.json();
 
       // Update debug info with response
-      setDebugInfo((prev: any) => ({
-        ...prev,
-        responseStatus: response.status,
-        responseData: data,
-        requestDuration,
-      }));
+      setDebugInfo(data);
 
-      if (response.ok) {
-        setStatus("success");
-        setMessage(data.message || "تم إعادة تفعيل اشتراكك بنجاح!");
+      // Check if subscriber was found
+      if (data.subscriberCheck && data.subscriberCheck.status === "found") {
+        // Check if already subscribed
+        if (data.subscriberCheck.currentlySubscribed) {
+          setStatus("success");
+          setMessage("أنت مشترك بالفعل في نشرة إثمار الإخبارية.");
+          return;
+        }
+
+        // Check if update was successful
+        if (data.updateResult && data.updateResult.success) {
+          setStatus("success");
+          setMessage("تم إعادة تفعيل اشتراكك بنجاح!");
+        } else {
+          setStatus("error");
+          const errorDetails =
+            data.updateResult && data.updateResult.error
+              ? data.updateResult.error
+              : "فشل تحديث الاشتراك";
+          setMessage(`فشل تحديث حالة الاشتراك: ${errorDetails}`);
+        }
+      } else if (
+        data.subscriberCheck &&
+        data.subscriberCheck.status === "not_found"
+      ) {
+        setStatus("error");
+        setMessage("البريد الإلكتروني أو رمز التحقق غير صالح");
       } else {
         setStatus("error");
-        setMessage(data.error || "حدث خطأ أثناء إعادة الاشتراك");
+        setMessage("حدث خطأ أثناء التحقق من الاشتراك");
       }
     } catch (error) {
       setStatus("error");

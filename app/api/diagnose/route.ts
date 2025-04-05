@@ -26,10 +26,11 @@ export async function GET(request: Request) {
     let databaseConnection = false;
 
     try {
-      // Simple query to test database connectivity
+      // Simple query to test database connectivity - avoid using count()
       const { data, error } = await supabase
         .from("subscribers")
-        .select("count()", { count: "exact" });
+        .select("id")
+        .limit(1);
 
       if (error) {
         supabaseStatus = "error";
@@ -72,7 +73,7 @@ export async function GET(request: Request) {
   }
 }
 
-// Add a POST endpoint for more detailed testing
+// Add a POST endpoint for more detailed testing and subscription updates
 export async function POST(request: Request) {
   try {
     let body;
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
       body = { parseError: "Could not parse JSON body" };
     }
 
-    const { email, token } = body;
+    const { email, token, performUpdate } = body;
 
     // First test - just echo parameters
     const echoTest = {
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
       receivedToken: token,
       emailProvided: !!email,
       tokenProvided: !!token,
+      performUpdateRequested: !!performUpdate,
     };
 
     // Second test - check if subscriber exists without making changes
@@ -128,11 +130,56 @@ export async function POST(request: Request) {
       }
     }
 
+    // Try to update the subscription if requested
+    let updateResult = null;
+    if (
+      email &&
+      token &&
+      performUpdate === true &&
+      subscriberCheck.status === "found" &&
+      !subscriberCheck.currentlySubscribed
+    ) {
+      try {
+        const { error } = await supabase
+          .from("subscribers")
+          .update({
+            subscribed: true,
+            unsubscribed_at: null,
+          })
+          .eq("id", subscriberCheck.subscriberId);
+
+        updateResult = {
+          attempted: true,
+          success: !error,
+          error: error ? error.message : null,
+        };
+      } catch (updateError) {
+        updateResult = {
+          attempted: true,
+          success: false,
+          error:
+            updateError instanceof Error
+              ? updateError.message
+              : String(updateError),
+        };
+      }
+    } else if (
+      subscriberCheck.status === "found" &&
+      subscriberCheck.currentlySubscribed
+    ) {
+      updateResult = {
+        attempted: false,
+        success: true,
+        message: "Already subscribed, no update needed",
+      };
+    }
+
     return NextResponse.json({
       diagnosticMode: true,
       timestamp: new Date().toISOString(),
       receivedData: echoTest,
       subscriberCheck,
+      updateResult,
     });
   } catch (error) {
     return NextResponse.json(
