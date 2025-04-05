@@ -1,18 +1,33 @@
 "use client";
-// app/resubscribe/page.tsx
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import React, { useState, useEffect } from "react";
+import { motion, Variants } from "framer-motion";
 
 export default function ResubscribePage() {
-  const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [token, setToken] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
+    "idle" | "loading" | "success" | "error" | "invalid-params"
   >("idle");
-  const [message, setMessage] = useState("");
-  const [autoSubmitted, setAutoSubmitted] = useState(false);
+  const [message, setMessage] = useState<string>("");
+  const [autoSubmitted, setAutoSubmitted] = useState<boolean>(false);
 
-  // Extract email and token from URL parameters
+  // Colors from the brand guidelines (matching unsubscribe page)
+  const colors = {
+    primaryGreen: "#2C953F",
+    darkGreen: "#1F682C",
+    darkerGreen: "#164B20",
+    lightGreen: "#6BB579",
+    white: "#FFFFFF",
+    lightGray: "#F5F5F5",
+    mediumGray: "#E4E4E4",
+    darkGray: "#B3B3B3",
+    brown: "#A5704A",
+  };
+
+  // Extract email and token from URL parameters and handle page state
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
@@ -27,9 +42,17 @@ export default function ResubscribePage() {
         if (emailParam && tokenParam && !autoSubmitted) {
           setAutoSubmitted(true);
           handleResubscribe(decodeURIComponent(emailParam), tokenParam);
+        } else if (!emailParam || !tokenParam) {
+          // If URL doesn't have both required parameters, show error state
+          setStatus("invalid-params");
+          setMessage(
+            "رابط إعادة الاشتراك غير صالح أو ناقص. الرجاء التحقق من استخدام الرابط الكامل المرسل إلى بريدك الإلكتروني."
+          );
         }
       } catch (error) {
         console.error("Error parsing URL parameters:", error);
+        setStatus("error");
+        setMessage("حدث خطأ أثناء معالجة رابط إعادة الاشتراك.");
       }
     }
   }, [autoSubmitted]);
@@ -38,13 +61,13 @@ export default function ResubscribePage() {
   const handleResubscribe = async (
     emailValue?: string,
     tokenValue?: string
-  ) => {
+  ): Promise<void> => {
     // Use provided values or form values
     const emailToUse = emailValue || email;
     const tokenToUse = tokenValue || token;
 
     if (!emailToUse || !tokenToUse) {
-      setStatus("error");
+      setStatus("invalid-params");
       setMessage("البريد الإلكتروني أو رمز التحقق غير صالح");
       return;
     }
@@ -81,178 +104,308 @@ export default function ResubscribePage() {
     }
   };
 
+  // Define animations for status transitions
+  const containerVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: -20,
+      transition: {
+        duration: 0.3,
+      },
+    },
+  };
+
   return (
-    <div
-      className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
-      dir="rtl"
-    >
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-        <div className="text-center">
-          <img
-            className="mx-auto h-20 w-auto"
-            src="https://nqveldgyeonkhrsrsjbn.supabase.co/storage/v1/object/public/companies/ethmarlogoS.svg"
-            alt="شعار إثمار"
-          />
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            إعادة الاشتراك
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            أهلاً بك مجدداً في مجتمع إثمار للشراكة الطلابية
-          </p>
-        </div>
-
-        {status === "idle" || status === "loading" ? (
-          <div className="space-y-4">
-            {!autoSubmitted && (
-              <>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    البريد الإلكتروني
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="token"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    رمز التحقق
-                  </label>
-                  <input
-                    id="token"
-                    name="token"
-                    type="text"
-                    required
-                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
-                    value={token}
-                    onChange={(e) => setToken(e.target.value)}
-                    disabled={loading}
-                  />
-                </div>
-
-                <div>
-                  <button
-                    type="button"
-                    onClick={() => handleResubscribe()}
-                    disabled={loading}
-                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                  >
-                    {loading ? "جاري المعالجة..." : "إعادة الاشتراك"}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {loading && (
-              <div className="text-center py-4">
-                <div className="inline-block animate-spin h-8 w-8 border-4 border-green-500 border-t-transparent rounded-full"></div>
-                <p className="mt-2 text-gray-600">
-                  جاري إعادة تفعيل اشتراكك...
-                </p>
-              </div>
-            )}
-          </div>
-        ) : status === "success" ? (
-          <div className="rounded-md bg-green-50 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-green-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="mr-3">
-                <h3 className="text-sm font-medium text-green-800">
-                  تم إعادة الاشتراك بنجاح
-                </h3>
-                <div className="mt-2 text-sm text-green-700">
-                  <p>{message}</p>
-                </div>
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() => (window.location.href = "/")}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  >
-                    العودة للرئيسية
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="rounded-md bg-red-50 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-red-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="mr-3">
-                <h3 className="text-sm font-medium text-red-800">حدث خطأ</h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{message}</p>
-                </div>
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setStatus("idle");
-                      setMessage("");
-                    }}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  >
-                    المحاولة مرة أخرى
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="text-center mt-4 text-sm text-gray-500">
-          <p>
-            لديك أسئلة؟{" "}
-            <a
-              href="mailto:support@ethmar.xyz"
-              className="font-medium text-green-600 hover:text-green-500"
-            >
-              تواصل معنا
-            </a>
-          </p>
-        </div>
+    <>
+      <div className="bg-gradient-to-br from-[#2C953F] via-[#1F682C] to-[#164B20]">
+        <Header />
       </div>
-    </div>
+      <div
+        dir="rtl"
+        className="font-sans flex flex-col min-h-screen"
+        style={{ background: "linear-gradient(to bottom, #F9FBF9, #F5F5F5)" }}
+      >
+        <main className="flex-grow flex items-center justify-center py-16">
+          <motion.div
+            className="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-10 mx-4"
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={containerVariants}
+          >
+            <div className="text-center">
+              {/* Logo */}
+              <motion.div
+                className="mx-auto mb-8 w-24 h-24 rounded-full flex items-center justify-center"
+                style={{ backgroundColor: colors.lightGreen }}
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke={colors.darkGreen}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                  />
+                </svg>
+              </motion.div>
+
+              {/* Title */}
+              <h2
+                className="text-3xl font-bold mb-6"
+                style={{ color: colors.darkGreen }}
+              >
+                إعادة الاشتراك في القائمة البريدية
+              </h2>
+
+              {/* Status and states - matching unsubscribe page */}
+              {status === "idle" && (
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  <p className="text-gray-700 text-xl mb-4">
+                    جاري التحقق من بيانات إعادة الاشتراك...
+                  </p>
+                  <motion.div
+                    className="flex justify-center mt-6"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                  >
+                    <motion.div
+                      className="h-14 w-14 border-4 rounded-full"
+                      style={{
+                        borderColor: `${colors.lightGreen}50`,
+                        borderTopColor: colors.primaryGreen,
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    ></motion.div>
+                  </motion.div>
+                </motion.div>
+              )}
+
+              {status === "loading" && (
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <div className="flex flex-col items-center">
+                    <motion.div
+                      className="h-16 w-16 border-4 rounded-full mb-6"
+                      style={{
+                        borderColor: `${colors.lightGreen}50`,
+                        borderTopColor: colors.primaryGreen,
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    ></motion.div>
+                    <p className="text-gray-600 text-xl">جاري معالجة طلبك...</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {status === "success" && (
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <motion.div
+                    className="mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${colors.lightGreen}30` }}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      delay: 0.2,
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke={colors.darkGreen}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </motion.div>
+                  <p className="text-gray-700 text-2xl mb-4 font-medium">
+                    {message || "تم إعادة تفعيل اشتراكك بنجاح!"}
+                  </p>
+                  <div
+                    className="py-3 px-6 rounded-lg mb-6 mx-auto max-w-md"
+                    style={{ backgroundColor: colors.lightGray }}
+                  >
+                    <p className="text-gray-700 text-lg" dir="ltr">
+                      {email && email}
+                    </p>
+                  </div>
+                  <motion.a
+                    href="/"
+                    className="inline-block mt-4 px-8 py-3 text-lg rounded-lg text-white font-medium transition-colors"
+                    style={{ backgroundColor: colors.primaryGreen }}
+                    whileHover={{
+                      backgroundColor: colors.darkGreen,
+                      scale: 1.02,
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    العودة للصفحة الرئيسية
+                  </motion.a>
+                </motion.div>
+              )}
+
+              {status === "error" && (
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <motion.div
+                    className="mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center bg-red-100"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-red-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </motion.div>
+                  <p className="text-gray-700 text-2xl mb-3 font-medium">
+                    حدث خطأ ما
+                  </p>
+                  <p className="text-gray-500 text-lg mb-6">
+                    {message ||
+                      "يرجى المحاولة مرة أخرى لاحقاً أو التواصل مع الدعم"}
+                  </p>
+                  <div className="flex justify-center space-x-4 space-x-reverse">
+                    <motion.a
+                      href="mailto:support@ethmar.xyz?subject=مشكلة في إعادة الاشتراك"
+                      className="px-8 py-3 text-lg rounded-lg text-white font-medium transition-colors"
+                      style={{ backgroundColor: colors.primaryGreen }}
+                      whileHover={{
+                        backgroundColor: colors.darkGreen,
+                        scale: 1.02,
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      تواصل مع الدعم
+                    </motion.a>
+                    <motion.a
+                      href="/"
+                      className="px-8 py-3 text-lg rounded-lg text-gray-700 font-medium transition-colors bg-gray-200"
+                      whileHover={{
+                        backgroundColor: colors.mediumGray,
+                        scale: 1.02,
+                      }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      العودة للرئيسية
+                    </motion.a>
+                  </div>
+                </motion.div>
+              )}
+
+              {status === "invalid-params" && (
+                <motion.div
+                  className="mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <motion.div
+                    className="mx-auto mb-6 w-20 h-20 rounded-full flex items-center justify-center bg-yellow-100"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-10 w-10 text-yellow-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                  </motion.div>
+                  <p className="text-gray-700 text-2xl mb-3 font-medium">
+                    رابط غير صالح
+                  </p>
+                  <p className="text-gray-500 text-lg mb-6">
+                    {message ||
+                      "يرجى استخدام رابط إعادة الاشتراك من البريد الإلكتروني"}
+                  </p>
+                  <motion.a
+                    href="/"
+                    className="inline-block mt-2 px-8 py-3 text-lg text-white rounded-lg font-medium transition-colors"
+                    style={{ backgroundColor: colors.primaryGreen }}
+                    whileHover={{
+                      backgroundColor: colors.darkGreen,
+                      scale: 1.02,
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    العودة للصفحة الرئيسية
+                  </motion.a>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </main>
+      </div>
+      <Footer />
+    </>
   );
 }
