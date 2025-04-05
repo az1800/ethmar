@@ -305,7 +305,8 @@ export default function ResubscribePage() {
         // Auto-submit if both parameters are present
         if (emailParam && tokenParam && !autoSubmitted) {
           setAutoSubmitted(true);
-          handleResubscribe();
+          // Use the dedicated function for auto-submission
+          handleDirectResubscribe(decodeURIComponent(emailParam), tokenParam);
         }
       } catch (error) {
         console.error("Error parsing URL parameters:", error);
@@ -313,6 +314,70 @@ export default function ResubscribePage() {
       }
     }
   }, [autoSubmitted]);
+
+  // Dedicated function for direct resubscription (auto-submission)
+  const handleDirectResubscribe = async (
+    emailValue: string,
+    tokenValue: string
+  ) => {
+    setLoading(true);
+    setStatus("loading");
+
+    try {
+      // Ensure performUpdate is set to true for direct submissions
+      const response = await fetch("/api/diagnose", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: emailValue,
+          token: tokenValue,
+          performUpdate: true, // Always set to true for auto-submission
+        }),
+      });
+
+      const data = await response.json();
+      setDebugInfo(data);
+
+      // Process response
+      if (data.subscriberCheck && data.subscriberCheck.status === "found") {
+        if (data.subscriberCheck.currentlySubscribed) {
+          setStatus("success");
+          setMessage("أنت مشترك بالفعل في نشرة إثمار الإخبارية.");
+        } else if (data.updateResult && data.updateResult.success) {
+          setStatus("success");
+          setMessage("تم إعادة تفعيل اشتراكك بنجاح!");
+        } else {
+          setStatus("error");
+          const errorDetails =
+            data.updateResult && data.updateResult.error
+              ? data.updateResult.error
+              : "فشل تحديث الاشتراك";
+          setMessage(`فشل تحديث حالة الاشتراك: ${errorDetails}`);
+        }
+      } else if (
+        data.subscriberCheck &&
+        data.subscriberCheck.status === "not_found"
+      ) {
+        setStatus("error");
+        setMessage("البريد الإلكتروني أو رمز التحقق غير صالح");
+      } else {
+        setStatus("error");
+        setMessage("حدث خطأ أثناء التحقق من الاشتراك");
+      }
+    } catch (error) {
+      setStatus("error");
+      setMessage("حدث خطأ غير متوقع");
+      console.error("Resubscribe error:", error);
+      setDebugInfo((prev: any) => ({
+        ...prev,
+        fetchError: String(error),
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDiagnoseApi = async () => {
     setLoading(true);
@@ -360,7 +425,7 @@ export default function ResubscribePage() {
     setStatus("loading");
 
     try {
-      // Use diagnostic API with update flag
+      // For manual submissions, use the same approach as direct resubscribe
       const response = await fetch("/api/diagnose", {
         method: "POST",
         headers: {
@@ -369,27 +434,19 @@ export default function ResubscribePage() {
         body: JSON.stringify({
           email,
           token,
-          performUpdate: true,
+          performUpdate: true, // Explicitly set to true
         }),
       });
 
-      // Get the response data
       const data = await response.json();
-
-      // Update debug info with response
       setDebugInfo(data);
 
-      // Check if subscriber was found
+      // Process response
       if (data.subscriberCheck && data.subscriberCheck.status === "found") {
-        // Check if already subscribed
         if (data.subscriberCheck.currentlySubscribed) {
           setStatus("success");
           setMessage("أنت مشترك بالفعل في نشرة إثمار الإخبارية.");
-          return;
-        }
-
-        // Check if update was successful
-        if (data.updateResult && data.updateResult.success) {
+        } else if (data.updateResult && data.updateResult.success) {
           setStatus("success");
           setMessage("تم إعادة تفعيل اشتراكك بنجاح!");
         } else {
