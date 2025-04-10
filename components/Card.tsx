@@ -47,7 +47,13 @@ export default function Card({
       <h1 className="text-lg font-semibold mx-auto w-fit">{name}</h1>
       {position && (
         <p className="w-fit mx-auto text-center">
-          {position} {committee !== "قادة الفرق" ? `في لجنة ${committee}` : ""}
+          {`${position}
+         ${
+           committee && committee !== "قادة الفرق"
+             ? ` في لجنة ${committee}`
+             : ""
+         }
+          `}
         </p>
       )}
     </div>
