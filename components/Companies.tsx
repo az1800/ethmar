@@ -7,7 +7,7 @@ import Card from "./Card";
 type Company = {
   id: number;
   Company_name: string;
-  imageLink: string;
+  Company_Logo: string;
 };
 
 interface AnimatedCardProps {
@@ -63,7 +63,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({
       <Card
         key={company.id}
         name={company.Company_name}
-        imageLink={company.imageLink || ethmarlogoP}
+        imageLink={company.Company_Logo || ethmarlogoP}
       />
     </div>
   );

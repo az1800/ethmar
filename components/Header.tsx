@@ -114,13 +114,14 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full px-6 md:px-14 py-4 z-50 transition-all duration-300">
+      <div className="flex items-center justify-between w-full px-6 md:px-14 py-4 z-50 transition-all duration-300 bg-gradient-to-r from-[#1F682C] to-[#164B20]">
         {/* Navigation Links (Hidden on Small Screens) */}
         <div className="hidden lg:flex md:hidden sm:hidden flex-row-reverse items-center justify-evenly w-[80%]">
           <SectionTitle title="الرئيسية" path="/" />
           <SectionTitle title="النشرات المالية" path="/blog" />
           <SectionTitle title="شركاء النجاح" path="/partners" />
           <SectionTitle title="الهيكلة" path="/structure" />
+          <SectionTitle title="إنجازاتنا" path="/acheivements" />
         </div>
 
         {/* Hamburger Menu (Shown on Small Screens) */}

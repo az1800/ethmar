@@ -15,8 +15,7 @@ import {
   Row,
   Column,
 } from "@react-email/components";
-import logo from "../../public/imagecopy.png";
-import image from "../../public/ethmarlogoP.svg";
+
 const WelcomeEmail = ({
   email,
   unsubscribeToken,
@@ -74,7 +73,7 @@ const WelcomeEmail = ({
               }}
             >
               <Img
-                src={"../../public/imagecopy.png"}
+                src={"https://www.ethmar.xyz/ethmarlogoS.svg"}
                 alt="شعار اثمار"
                 width="140"
                 height="100"
