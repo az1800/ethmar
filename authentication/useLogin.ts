@@ -65,23 +65,37 @@ interface LoginCredentials {
   password: string;
 }
 
-// Define interface for login response
-interface LoginResponse {
-  token?: string;
-  user?: {
-    id: string;
-    email: string;
-  };
+// Updated interface to match Supabase's return structure
+interface User {
+  id: string;
+  email?: string;
+  // Add other user properties as needed
+}
+
+interface Session {
+  access_token: string;
+  // Add other session properties as needed
+}
+
+interface WeakPassword {
+  // Define properties if needed
+}
+
+// This interface matches what Supabase auth.signInWithPassword actually returns
+interface SupabaseAuthResponse {
+  user: User;
+  session: Session;
+  weakPassword?: WeakPassword;
 }
 
 export function useLogin() {
   const router = useRouter();
   const { showNotification } = useNotification();
 
-  const mutation = useMutation({
+  const mutation = useMutation<SupabaseAuthResponse, Error, LoginCredentials>({
     mutationFn: ({ email, password }: LoginCredentials) =>
       loginAPI({ email, password }),
-    onSuccess: (data: LoginResponse) => {
+    onSuccess: (data) => {
       console.log("Login successful", data);
       // Show success notification
       showNotification({
