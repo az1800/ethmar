@@ -1,12 +1,14 @@
 import { Geist } from "next/font/google";
 import { Tajawal, Cairo } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-
-import "./globals.css";
-
 import { PostsProvider } from "../Contexts/PostsContext";
 import { PostFiltersProvider } from "../Contexts/PostFiltersContext";
 import { Metadata } from "next";
+
+import "./globals.css";
+import { useState } from "react";
+import QueryProvider from "@/context/QueryProvider";
+import { NotificationProvider } from "@/components/Notification";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -77,9 +79,13 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="bg-background text-foreground">
-        <PostsProvider>
-          <PostFiltersProvider>{children}</PostFiltersProvider>
-        </PostsProvider>
+        <NotificationProvider>
+          <QueryProvider>
+            <PostsProvider>
+              <PostFiltersProvider>{children}</PostFiltersProvider>
+            </PostsProvider>
+          </QueryProvider>
+        </NotificationProvider>
       </body>
     </html>
   );
