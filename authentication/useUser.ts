@@ -8,7 +8,18 @@ export function useUser() {
     isLoading,
   } = useQuery({ queryKey: ["user"], queryFn: getCurrentUser });
 
-  if (error) return null;
+  // Return a safe default when there's an error instead of null
+  if (error) {
+    return {
+      user: null,
+      isLoading: false,
+      isAuthenticated: false,
+    };
+  }
 
-  return { user, isLoading, isAuthenticated: user?.role === "authenticated" };
+  return {
+    user,
+    isLoading,
+    isAuthenticated: user?.role === "authenticated",
+  };
 }
