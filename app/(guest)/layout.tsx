@@ -1,32 +1,29 @@
 "use client";
 import { useUser } from "@/authentication/useUser";
 import Loader from "@/components/Loader";
-import { useNotification } from "@/components/Notification";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 
 export default function GuestLayout({ children }: { children: ReactNode }) {
-  const { user, isLoading, isAuthenticated } = useUser();
-  const { showNotification } = useNotification();
+  const { isLoading, isAuthenticated } = useUser();
+  const router = useRouter();
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      showNotification({
-        type: "info",
-        title: "تم تسجيل الدخول",
-        message: "أنت مسجل دخول بالفعل. سيتم إعادة توجيهك إلى الصفحة الرئيسية.",
-        duration: 4000,
-      });
-
-      // Short delay before redirect to show the notification
-      const redirectTimer = setTimeout(() => {
-        redirect("/");
-      }, 1000);
-
-      return () => clearTimeout(redirectTimer);
+      router.replace("/");
     }
-  }, [isLoading, isAuthenticated, showNotification]);
+  }, [isLoading, isAuthenticated, router]);
 
-  // Show loading state or the children
-  return isLoading ? <Loader /> : children;
+  // Show login page immediately if we know we're not authenticated
+  if (!isLoading && !isAuthenticated) {
+    return <>{children}</>;
+  }
+
+  // Only show loader if we're actually loading
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  // This should not be reached, but just in case
+  return null;
 }

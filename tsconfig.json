@@ -30,7 +30,8 @@
     ".next/types/**/*.ts",
     "components/Companies.tsx",
     "app/test/RotatingText.jsx",
-    "Services/supabase.ts"
+    "Services/supabase.ts",
+    "middleware.ts.disabled"
   ],
   "exclude": ["node_modules"]
 }

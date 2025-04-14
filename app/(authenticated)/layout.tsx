@@ -1,9 +1,10 @@
 "use client";
+
 import { useUser } from "@/authentication/useUser";
-import { useNotification } from "@/components/Notification";
-import { redirect } from "next/navigation";
-import { ReactNode, useEffect } from "react";
-import { Loader } from "lucide-react";
+
+import { ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import Loader from "@/components/Loader";
 
 export default function AuthenticatedLayout({
   children,
@@ -11,33 +12,36 @@ export default function AuthenticatedLayout({
   children: ReactNode;
 }) {
   const { user, isLoading, isAuthenticated } = useUser();
-  const { showNotification } = useNotification();
+  const router = useRouter();
 
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      showNotification({
-        type: "error",
-        title: "خطأ في الوصول",
-        message:
-          "يجب تسجيل الدخول للوصول إلى هذه الصفحة. سيتم إعادة توجيهك إلى صفحة تسجيل الدخول.",
-        duration: 4000,
-      });
+  console.log("Auth layout render state:", {
+    isLoading,
+    isAuthenticated,
+    userId: user?.id,
+  });
 
-      // Short delay before redirect to show the notification
-      const redirectTimer = setTimeout(() => {
-        redirect("/login");
-      }, 1000);
+  // Show loading state while authentication is being checked
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader />
+      </div>
+    );
+  }
 
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [isLoading, isAuthenticated, showNotification]);
+  // Once loading is complete, check authentication
+  if (!isAuthenticated) {
+    // Handle this case directly with client-side navigation
+    router.push("/login");
 
-  // Show loading state or the children
-  return isLoading ? (
-    <div className="flex justify-center items-center h-screen">
-      <Loader className="animate-spin" />
-    </div>
-  ) : (
-    children
-  );
+    // Show a temporary loading state
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-gray-500">Redirecting to login...</p>
+      </div>
+    );
+  }
+
+  // If authenticated, render the page content
+  return children;
 }

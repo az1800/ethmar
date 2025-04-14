@@ -1,3 +1,5 @@
+"use client";
+
 import { getCurrentUser } from "@/Services/authAPI";
 import { useQuery } from "@tanstack/react-query";
 
@@ -6,10 +8,33 @@ export function useUser() {
     data: user,
     error,
     isLoading,
-  } = useQuery({ queryKey: ["user"], queryFn: getCurrentUser });
+  } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      console.log("Fetching user data...");
+      try {
+        const userData = await getCurrentUser();
+        console.log("User data received:", userData);
+        return userData;
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        throw error;
+      }
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
 
-  // Return a safe default when there's an error instead of null
+  console.log("useUser hook - current state:", { user, error, isLoading });
+
+  // Check authentication status
+  const isAuthenticated = Boolean(user);
+
+  console.log("isAuthenticated:", isAuthenticated);
+  console.log("user:", user);
+
   if (error) {
+    console.error("Authentication error:", error);
     return {
       user: null,
       isLoading: false,
@@ -20,6 +45,6 @@ export function useUser() {
   return {
     user,
     isLoading,
-    isAuthenticated: user?.role === "authenticated",
+    isAuthenticated,
   };
 }
