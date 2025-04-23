@@ -52,15 +52,22 @@ export default function Page() {
   // Add a viewport meta tag for better mobile display
   useEffect(() => {
     // Check if there's an existing viewport meta tag
-    let viewportMeta = document.querySelector('meta[name="viewport"]');
+    // let viewportMeta = document.querySelector('meta[name="viewport"]');
+    const viewportMeta = document.querySelector(
+      'meta[name="viewport"]'
+    ) as HTMLMetaElement | null;
 
     // If not, create and append one
     if (!viewportMeta) {
-      viewportMeta = document.createElement("meta");
-      viewportMeta.name = "viewport";
-      viewportMeta.content =
-        "width=device-width, initial-scale=1, maximum-scale=1";
-      document.head.appendChild(viewportMeta);
+      // viewportMeta = document.createElement("meta");
+      // viewportMeta.name = "viewport";
+      // viewportMeta.content =
+      //   "width=device-width, initial-scale=1, maximum-scale=1";
+      // document.head.appendChild(viewportMeta);
+      const newMeta = document.createElement("meta");
+      newMeta.name = "viewport";
+      newMeta.content = "width=device-width, initial-scale=1, maximum-scale=1";
+      document.head.appendChild(newMeta);
     }
 
     // Fetch achievements data
@@ -68,7 +75,7 @@ export default function Page() {
       try {
         setLoading(true);
         const data = await getAchievements();
-        setAchievements(data);
+        setAchievements(data || []);
         setLoading(false);
       } catch (err) {
         console.error("Failed to fetch achievements:", err);
