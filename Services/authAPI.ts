@@ -7,8 +7,6 @@ export async function login({
   password: string;
   email: string;
 }) {
-  "Login attempt for:", email;
-
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
@@ -19,7 +17,6 @@ export async function login({
     throw new Error(error.message);
   }
 
-  "Login successful, data:", data;
   return data;
 }
 
@@ -31,11 +28,11 @@ export async function getCurrentUser() {
     const { data: sessionData, error: sessionError } =
       await supabase.auth.getSession();
 
-    "Session check result:",
-      {
-        hasSession: Boolean(sessionData?.session),
-        sessionError: sessionError?.message,
-      };
+    // "Session check result:",
+    //   {
+    //     hasSession: Boolean(sessionData?.session),
+    //     sessionError: sessionError?.message,
+    //   };
 
     if (sessionError) {
       console.error("Session error:", sessionError.message);
@@ -59,13 +56,6 @@ export async function getCurrentUser() {
       ("No user found");
       return null;
     }
-
-    "User found:",
-      {
-        id: data.user.id,
-        email: data.user.email,
-        hasUserMetadata: Boolean(data.user.user_metadata),
-      };
 
     // Return the user with an explicit authenticated property
     return data.user;
