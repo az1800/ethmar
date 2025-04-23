@@ -75,10 +75,25 @@ export async function getPostCountsByCategory() {
   };
 
   // Count posts per category
-  data.forEach((post) => {
+  // data.forEach((post) => {
+  //   const categoryKey = categoryMapping[post.Category];
+  //   if (categoryKey) {
+  //     counts[categoryKey]++;
+  //   }
+  // });
+  type CategoryName =
+    | "تحليل القطاعات"
+    | "البحوث المالية"
+    | "التحليل المالي"
+    | "قصة سهم"
+    | "المصطلحات المالية"
+    | "مختارات إثمار المالية"
+    | "منشور مميز";
+
+  data.forEach((post: { Category: CategoryName }) => {
     const categoryKey = categoryMapping[post.Category];
     if (categoryKey) {
-      counts[categoryKey]++;
+      counts[categoryKey as keyof typeof counts]++;
     }
   });
 
