@@ -68,6 +68,14 @@ interface Stats {
   members: number;
 }
 
+// interface Achievement {
+//   id: number;
+//   title: string;
+//   description: string;
+//   date: string;
+//   image_url: string;
+//   icon: string;
+// }
 interface Achievement {
   id: number;
   title: string;
@@ -76,7 +84,6 @@ interface Achievement {
   image_url: string;
   icon: string;
 }
-
 interface Notification {
   show: boolean;
   message: string;
@@ -100,11 +107,18 @@ interface CategoryStats {
   featuredPost: number;
 }
 
+// interface Member {
+//   id: number;
+//   name: string;
+//   role: string;
+//   image_url: string;
+// }
 interface Member {
   id: number;
-  name: string;
-  role: string;
-  image_url: string;
+  full_Name: string;
+  Position: string;
+  Committee: string;
+  Gender: string;
 }
 
 interface Partner {
@@ -114,20 +128,44 @@ interface Partner {
 }
 
 // Helper function to get icon component based on string
-const getIconComponent = (iconName: string): JSX.Element => {
+// const getIconComponent = (iconName: string): JSX.Element => {
+//   const iconMap: Record<string, LucideIcon> = {
+//     Trophy: Trophy,
+//     Star: Star,
+//     Award: Award,
+//     Check: Check,
+//     ArrowUp: ArrowUp,
+//     Calendar: Calendar,
+//   };
+
+//   const IconComponent = iconMap[iconName] || Award;
+//   return <IconComponent size={24} className="text-green-600" />;
+// };
+// const getIconComponent = (iconName: string): JSX.Element => {
+//   const iconMap: Record<string, LucideIcon> = {
+//     Trophy: Trophy,
+//     Star: Star,
+//     Award: Award,
+//     Check: Check,
+//     ArrowUp: ArrowUp,
+//     Calendar: Calendar,
+//   };
+
+//   const IconComponent = iconMap[iconName] || Award;
+//   return <IconComponent size={24} className="text-green-600" />;
+// };
+const getIconComponent = (iconName: string): LucideIcon => {
   const iconMap: Record<string, LucideIcon> = {
-    Trophy: Trophy,
-    Star: Star,
-    Award: Award,
-    Check: Check,
-    ArrowUp: ArrowUp,
-    Calendar: Calendar,
+    Trophy,
+    Star,
+    Award,
+    Check,
+    ArrowUp,
+    Calendar,
   };
 
-  const IconComponent = iconMap[iconName] || Award;
-  return <IconComponent size={24} className="text-green-600" />;
+  return iconMap[iconName] || Award;
 };
-
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [loading, setLoading] = useState<boolean>(false);
@@ -151,13 +189,13 @@ export default function AdminDashboard() {
     type: "",
   });
   const [categoryStats, setCategoryStats] = useState<CategoryStats>({
-    sectorAnalysis: 12, // تحليل القطاعات
-    financialResearch: 8, // البحوث المالية
-    financialAnalysis: 15, // التحليل المالي
-    stockStory: 6, // قصة سهم
-    financialTerms: 10, // المصطلحات المالية
+    sectorAnalysis: 0, // تحليل القطاعات
+    financialResearch: 1, // البحوث المالية
+    financialAnalysis: 2, // التحليل المالي
+    stockStory: 3, // قصة سهم
+    financialTerms: 4, // المصطلحات المالية
     ithmarPicks: 5, // مختارات إثمار المالية
-    featuredPost: 3, // منشور مميز
+    featuredPost: 6, // منشور مميز
   });
   const {
     register,
@@ -250,29 +288,50 @@ export default function AdminDashboard() {
   };
 
   // Fetch achievements list
+  // const fetchAchievements = async (): Promise<void> => {
+  //   try {
+  //     setLoading(true);
+  //     const achievementsData = await getAcheivements();
+  //     // Do something with achievements (e.g., set to state)
+  //     setAchievements(achievementsData);
+
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error("Error fetching achievements:", error);
+  //     setLoading(false);
+  //   }
+  // };
   const fetchAchievements = async (): Promise<void> => {
     try {
       setLoading(true);
       const achievementsData = await getAcheivements();
-      // Do something with achievements (e.g., set to state)
-      setAchievements(achievementsData);
-
+      setAchievements(achievementsData || []); // Default to an empty array if null
       setLoading(false);
     } catch (error) {
       console.error("Error fetching achievements:", error);
       setLoading(false);
     }
   };
-
   // Fetch members list
+  // const fetchMembers = async (): Promise<void> => {
+  //   try {
+  //     setLoading(true);
+  //     const membersData = await getMembers();
+  //     // Do something with achievements (e.g., set to state)
+  //     console.log(membersData);
+  //     setMembers(membersData);
+
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error("Error fetching members:", error);
+  //     setLoading(false);
+  //   }
+  // };
   const fetchMembers = async (): Promise<void> => {
     try {
       setLoading(true);
       const membersData = await getMembers();
-      // Do something with achievements (e.g., set to state)
-      console.log(membersData);
-      setMembers(membersData);
-
+      setMembers((membersData ?? []) as Member[]);
       setLoading(false);
     } catch (error) {
       console.error("Error fetching members:", error);
@@ -285,9 +344,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       const response = await getPartners();
-      // Extract the data array from the response
-      const partnersData = response.data;
-      console.log(partnersData);
+      const partnersData = response.data || []; // Default to an empty array if null
       setPartners(partnersData);
       setLoading(false);
     } catch (error) {
@@ -922,11 +979,20 @@ export default function AdminDashboard() {
                         </div>
                         <div className="p-5" dir="rtl">
                           <div className="flex items-center mb-3">
-                            {getIconComponent(achievement.icon)}
+                            {(() => {
+                              const Icon = getIconComponent(achievement.icon);
+                              return (
+                                <Icon
+                                  size={24}
+                                  className="text-green-600 mr-2"
+                                />
+                              );
+                            })()}
                             <h3 className="text-lg font-bold text-gray-800 dark:text-white mr-2">
                               {achievement.title}
                             </h3>
                           </div>
+
                           <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-3 font-arabic">
                             {achievement.description}
                           </p>
@@ -1169,7 +1235,7 @@ export default function AdminDashboard() {
             )}
 
             {/* Partners Tab */}
-            {activeTab === "partners" && <Companies partners={partners} />}
+            {activeTab === "partners" && <Companies type={"dashboard"} />}
 
             {/* Articles Tab (Placeholder) */}
             {activeTab === "articles" && (
@@ -1196,7 +1262,7 @@ export default function AdminDashboard() {
             )}
 
             {/* Members Tab */}
-            {activeTab === "members" && <Members members={members} />}
+            {activeTab === "members" && <Members type={"dashboard"} />}
           </main>
         </div>
       </div>
