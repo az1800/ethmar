@@ -28,10 +28,6 @@ export async function POST(request: Request) {
     email = email.trim().toLowerCase();
     token = token.trim();
 
-    ("Processing unsubscribe request:");
-    "- Email:", email;
-    "- Token:", token;
-
     // First check if the email and token combination exists
     const { data: subscribers, error: fetchError } = await supabase
       .from("subscribers")
@@ -57,7 +53,6 @@ export async function POST(request: Request) {
     }
 
     const subscriber = subscribers[0];
-    "Found matching subscriber:", subscriber.id;
 
     // Check if already unsubscribed
     if (subscriber.subscribed === false) {
@@ -73,8 +68,6 @@ export async function POST(request: Request) {
       subscribed: false,
       unsubscribed_at: new Date().toISOString(),
     };
-
-    "Updating subscriber with data:", updateData;
 
     // Update the specific record by ID for more reliability
     const { error: updateError } = await supabase
@@ -93,8 +86,6 @@ export async function POST(request: Request) {
       );
     }
 
-    "Successfully updated subscriber:", subscriber.id;
-
     // Send confirmation email if Resend is initialized
 
     if (resend) {
@@ -110,7 +101,6 @@ export async function POST(request: Request) {
           subject: "تأكيد إلغاء الاشتراك",
           react: emailComponent,
         });
-        "Sent unsubscribe confirmation email to:", email;
       } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
       }

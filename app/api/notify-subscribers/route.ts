@@ -23,11 +23,6 @@ export async function POST(request: Request) {
       );
     }
 
-    ("Processing notification request:");
-    "- Post ID:", postId;
-    "- Category:", category;
-    "- Title:", title;
-
     // Get the post details - we need full details for the email
     let postDetails;
     const { data: post, error: postError } = await supabase
