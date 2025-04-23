@@ -9,6 +9,7 @@ import "./globals.css";
 import { useState } from "react";
 import QueryProvider from "@/context/QueryProvider";
 import { NotificationProvider } from "@/components/Notification";
+import PlausibleProvider from "next-plausible";
 
 const tajawal = Tajawal({
   subsets: ["arabic"],
@@ -79,13 +80,15 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
       </head>
       <body className="bg-background text-foreground">
-        <NotificationProvider>
-          <QueryProvider>
-            <PostsProvider>
-              <PostFiltersProvider>{children}</PostFiltersProvider>
-            </PostsProvider>
-          </QueryProvider>
-        </NotificationProvider>
+        <PlausibleProvider domain="ethmar.xyz">
+          <NotificationProvider>
+            <QueryProvider>
+              <PostsProvider>
+                <PostFiltersProvider>{children}</PostFiltersProvider>
+              </PostsProvider>
+            </QueryProvider>
+          </NotificationProvider>
+        </PlausibleProvider>
       </body>
     </html>
   );

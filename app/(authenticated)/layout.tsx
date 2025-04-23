@@ -14,12 +14,6 @@ export default function AuthenticatedLayout({
   const { user, isLoading, isAuthenticated } = useUser();
   const router = useRouter();
 
-  console.log("Auth layout render state:", {
-    isLoading,
-    isAuthenticated,
-    userId: user?.id,
-  });
-
   // Show loading state while authentication is being checked
   if (isLoading) {
     return (

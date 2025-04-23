@@ -9,6 +9,16 @@ interface Member {
   Position: string;
   Committee: string;
   Gender: string;
+  // Add these properties that are used in the dashboard view
+  imageUrl?: string;
+  name?: string;
+  role?: string;
+  email?: string;
+  phone?: string;
+}
+
+interface MembersProps {
+  type?: "dashboard" | "regular";
 }
 
 // Add proper type definitions for component props
@@ -131,7 +141,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({
   );
 };
 
-const Members: React.FC = () => {
+const Members: React.FC<MembersProps> = ({ type = "regular" }) => {
   const [cards, setCards] = useState<Member[]>([]);
 
   useEffect(() => {
@@ -140,7 +150,14 @@ const Members: React.FC = () => {
         const data = await getMembers();
 
         if (Array.isArray(data)) {
-          setCards(data as Member[]);
+          // Map the data to ensure consistent naming across both views
+          const mappedData = data.map((member) => ({
+            ...member,
+            // Add these properties for dashboard view if they don't exist
+            name: member.full_Name,
+            role: member.Position,
+          }));
+          setCards(mappedData as Member[]);
         } else {
           setCards([]);
         }
@@ -169,6 +186,115 @@ const Members: React.FC = () => {
     {} as Record<string, Member[]>
   );
 
+  if (type === "dashboard") {
+    return (
+      <>
+        {/* 🔹 Render each committee with its members */}
+        <div className="flex flex-col gap-16" dir="rtl">
+          {Object.entries(committees).map(
+            ([committeeName, members], committeeIndex) => (
+              <div
+                key={committeeName}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-700"
+              >
+                {/* Committee Header - Subtle and Clean */}
+                <div className="mb-8 border-b border-gray-200 dark:border-gray-700 pb-3">
+                  <h2
+                    className="text-xl font-bold text-gray-800 dark:text-white mr-3"
+                    dir="rtl"
+                  >
+                    {committeeName ? committeeName : "لجنة القادة"}
+                  </h2>
+                </div>
+
+                {/* Members Grid - Consistent Sizing */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {members.map((member, index) => (
+                    <div
+                      key={member.id}
+                      className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 hover:shadow-md transition-shadow duration-300"
+                    >
+                      <div className="flex items-center mb-4" dir="rtl">
+                        <div className="h-14 w-14 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mr-3">
+                          {member.imageUrl ? (
+                            <img
+                              src={member.imageUrl}
+                              alt={member.full_Name}
+                              className="h-12 w-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                              <span className="text-lg font-semibold text-gray-600 dark:text-gray-300">
+                                {member.full_Name.charAt(0)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-800 dark:text-white">
+                            {member.full_Name}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
+                            {member.Position || "عضو"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {member.email && (
+                        <div
+                          className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-2"
+                          dir="rtl"
+                        >
+                          <span className="ml-2">✉️</span>
+                          {member.email}
+                        </div>
+                      )}
+
+                      {member.phone && (
+                        <div
+                          className="text-sm text-gray-500 dark:text-gray-400 flex items-center mt-1"
+                          dir="rtl"
+                        >
+                          <span className="ml-2">📱</span>
+                          {member.phone}
+                        </div>
+                      )}
+
+                      <div
+                        className="flex justify-end mt-4 space-x-2"
+                        dir="ltr"
+                      >
+                        <button className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                          <span className="text-gray-500 dark:text-gray-400">
+                            ✏️
+                          </span>
+                        </button>
+                        <button className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
+                          <span className="text-red-500">🗑️</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Add Member Button */}
+        <div className="flex justify-center mt-10 mb-16">
+          <button
+            className="px-6 py-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+            style={{ backgroundColor: "#164B20" }}
+            dir="rtl"
+          >
+            <span className="font-bold">إضافة عضو جديد</span>
+          </button>
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       {/* 🔹 Title Section */}
@@ -195,7 +321,6 @@ const Members: React.FC = () => {
           ([committeeName, members], committeeIndex) => (
             <div key={committeeName}>
               {/* Animated Committee Header */}
-
               <AnimatedCommitteeHeader
                 committeeName={committeeName}
                 index={committeeIndex}
@@ -205,7 +330,7 @@ const Members: React.FC = () => {
               <div
                 className={`grid grid-cols-2 gap-12 my-6 mx-auto w-fit ${
                   members.length === 1
-                    ? "md:grid-cols-1 "
+                    ? "md:grid-cols-1"
                     : members.length === 2
                       ? "md:grid-cols-2"
                       : members.length === 3

@@ -18,7 +18,7 @@ export default function Header() {
 
   return (
     <>
-      <div className="flex items-center justify-between w-full px-6 md:px-14 py-4 z-50 transition-all duration-300 bg-gradient-to-r from-[#1F682C] to-[#164B20]">
+      <div className=" flex items-center justify-between w-full px-6  md:px-14 py-4 z-50 transition-all duration-300 ">
         {/* Navigation Links (Hidden on Small Screens) */}
         <div className="hidden lg:flex md:hidden sm:hidden flex-row-reverse items-center justify-evenly w-[80%]">
           <SectionTitle title="الرئيسية" path="/" />
@@ -26,6 +26,9 @@ export default function Header() {
           <SectionTitle title="شركاء النجاح" path="/partners" />
           <SectionTitle title="الهيكلة" path="/structure" />
           <SectionTitle title="إنجازاتنا" path="/acheivements" />
+          {isAuthenticated && (
+            <SectionTitle title="لوحة التحكم" path="/adminDashboard" />
+          )}
 
           {/* Conditional Login/Logout Button */}
           {isAuthenticated ? (
@@ -42,7 +45,7 @@ export default function Header() {
           ) : (
             <Link href="/login">
               <button
-                className="bg-white text-[#1F682C] font-bold py-2 px-6 rounded-md hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-md"
+                className="bg-white text-green-900 font-bold py-2 px-6 rounded-md hover:bg-opacity-90 transition-all duration-300 transform hover:scale-105 shadow-md"
                 style={{
                   boxShadow: "0 4px 6px rgba(31, 104, 44, 0.2)",
                 }}
@@ -56,7 +59,7 @@ export default function Header() {
         {/* Hamburger Menu (Shown on Small Screens) */}
         <div className="lg:hidden md:block sm:block">
           <HamburgerMenu
-            className="text-7xl focus:outline-none text-white"
+            className="relative text-7xl focus:outline-none text-white "
             onClick={() => {
               setOpen(!open);
             }}
@@ -70,8 +73,8 @@ export default function Header() {
               src={ethmarlogoS.src}
               className="w-[180px] md:w-[220px] h-auto"
               alt="Ethmar Logo"
-              width={220}
-              height={150}
+              width={180}
+              height={120}
             />
           </div>
         </Link>
@@ -139,22 +142,37 @@ export default function Header() {
           >
             إنجازاتنا
           </Link>
-
+          {isAuthenticated && (
+            <Link
+              href="/adminDashboard"
+              className="block text-black w-full mx-auto hover:bg-gray-100 py-2 transition-all duration-300 transform hover:translate-x-2"
+              style={{
+                transitionDelay: open ? "550ms" : "0ms",
+                opacity: open ? 1 : 0,
+                transform: open ? "translateX(0)" : "translateX(-20px)",
+              }}
+            >
+              لوحة التحكم
+            </Link>
+          )}
           {/* Conditional Login/Logout Button for Mobile */}
           {isAuthenticated ? (
             <div
-              className="block w-64 mx-auto transition-all duration-300"
+              className="block  mx-auto transition-all duration-300"
               style={{
                 transitionDelay: open ? "650ms" : "0ms",
                 opacity: open ? 1 : 0,
               }}
             >
               <button
+                type="button"
                 onClick={handleLogout}
                 disabled={isLoggingOut}
-                className="bg-[#1F682C] text-white font-bold py-2 px-6 rounded-md w-full hover:bg-[#164B20] transition-all duration-300 transform hover:scale-105 shadow-md"
+                className="block w-full mx-auto py-2 bg-white text-green-900 rounded-xl font-semibold hover:bg-emerald-100 transition-all duration-300 shadow-md transform hover:translate-x-2"
                 style={{
-                  boxShadow: "0 4px 6px rgba(31, 104, 44, 0.2)",
+                  transitionDelay: open ? "650ms" : "0ms",
+                  opacity: open ? 1 : 0,
+                  transform: open ? "translateX(0)" : "translateX(-20px)",
                 }}
               >
                 {isLoggingOut ? "جاري تسجيل الخروج..." : "تسجيل الخروج"}
@@ -163,20 +181,14 @@ export default function Header() {
           ) : (
             <Link
               href="/login"
-              className="block w-64 mx-auto transition-all duration-300"
+              className="block text-black w-full mx-auto hover:bg-gray-100 py-2 transition-all duration-300 transform hover:translate-x-2"
               style={{
                 transitionDelay: open ? "650ms" : "0ms",
                 opacity: open ? 1 : 0,
+                transform: open ? "translateX(0)" : "translateX(-20px)",
               }}
             >
-              <button
-                className="bg-[#1F682C] text-white font-bold py-2 px-6 rounded-md w-full hover:bg-[#164B20] transition-all duration-300 transform hover:scale-105 shadow-md"
-                style={{
-                  boxShadow: "0 4px 6px rgba(31, 104, 44, 0.2)",
-                }}
-              >
-                تسجيل الدخول
-              </button>
+              تسجيل الدخول
             </Link>
           )}
         </div>

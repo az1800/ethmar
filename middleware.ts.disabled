@@ -16,7 +16,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = url;
 
   // Add debug logging
-  console.log(`Middleware running for path: ${pathname}`, {
+  (`Middleware running for path: ${pathname}`, {
     hasSession: !!session,
     isLoginPage: pathname.includes("/login"),
     isAuthPage:
@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
 
   // Handle guest routes (accessible only for non-authenticated users)
   if (isGuestRoute && session) {
-    console.log("User is authenticated, redirecting from login to home");
+    ("User is authenticated, redirecting from login to home");
     // Redirect authenticated users away from guest routes
     url.pathname = "/";
     return NextResponse.redirect(url);
@@ -38,7 +38,7 @@ export async function middleware(req: NextRequest) {
 
   // Handle authenticated routes (accessible only for authenticated users)
   if (isAuthRoute && !session) {
-    console.log("User is not authenticated, redirecting to login");
+    ("User is not authenticated, redirecting to login");
     // Redirect non-authenticated users to login
     url.pathname = "/login";
     return NextResponse.redirect(url);

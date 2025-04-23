@@ -40,7 +40,12 @@ export default function LoginPage() {
 
   return (
     <>
-      <Header />
+      <div className="relative bg-gradient-to-r from-emerald-700 to-green-900">
+        <Header />
+
+        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJ3aGl0ZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZoLTJ2LTRoMnY0em0wLTZoLTJWNmgydjEwem0tNiA2aC0ydi00aDJ2NHptMC02aC0ydi00aDJ2NHptMC02aC0yVjZoMnYxMHoiLz48L2c+PC9zdmc+')]"></div>
+      </div>
+
       <div
         className="min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12"
         style={{
@@ -51,12 +56,6 @@ export default function LoginPage() {
       >
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
           <div className="text-center">
-            {/* Logo Container */}
-            <div className="mx-auto h-20 w-40 relative mb-6">
-              <div className="w-full h-full bg-[#384252] flex items-center justify-center">
-                {/* Placeholder for the dark navy logo shown in your screenshots */}
-              </div>
-            </div>
             {/* Title with gradient text */}
             <h2 className="mt-4 text-center text-2xl font-bold bg-gradient-to-r from-[#1F682C] to-[#2C953F] inline-block text-transparent bg-clip-text">
               تسجيل الدخول إلى حسابك

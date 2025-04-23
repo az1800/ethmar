@@ -28,10 +28,10 @@ const UnsubscribeContent = () => {
 
   // Log URL parameters for debugging
   useEffect(() => {
-    console.log("URL Parameters:");
-    console.log("- Email:", email);
-    console.log("- Token:", token);
-    console.log("- Token Length:", token?.length);
+    ("URL Parameters:");
+    "- Email:", email;
+    "- Token:", token;
+    "- Token Length:", token?.length;
   }, [email, token]);
 
   // Check for valid parameters
@@ -51,9 +51,9 @@ const UnsubscribeContent = () => {
     }
 
     try {
-      console.log("Sending unsubscribe request with:");
-      console.log("- Email:", email);
-      console.log("- Token:", token);
+      ("Sending unsubscribe request with:");
+      "- Email:", email;
+      "- Token:", token;
 
       const response = await fetch("/api/unsubscribe", {
         method: "POST",
@@ -67,10 +67,10 @@ const UnsubscribeContent = () => {
       });
 
       // Log the raw response
-      console.log("Response status:", response.status);
+      "Response status:", response.status;
 
       const data = await response.json();
-      console.log("Response data:", data);
+      "Response data:", data;
 
       if (!response.ok || data.error) {
         console.error("Unsubscribe error:", data.error);

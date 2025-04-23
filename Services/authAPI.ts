@@ -7,7 +7,7 @@ export async function login({
   password: string;
   email: string;
 }) {
-  console.log("Login attempt for:", email);
+  "Login attempt for:", email;
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -19,22 +19,23 @@ export async function login({
     throw new Error(error.message);
   }
 
-  console.log("Login successful, data:", data);
+  "Login successful, data:", data;
   return data;
 }
 
 export async function getCurrentUser() {
-  console.log("getCurrentUser called");
+  ("getCurrentUser called");
 
   try {
     // First check if we have a session
     const { data: sessionData, error: sessionError } =
       await supabase.auth.getSession();
 
-    console.log("Session check result:", {
-      hasSession: Boolean(sessionData?.session),
-      sessionError: sessionError?.message,
-    });
+    "Session check result:",
+      {
+        hasSession: Boolean(sessionData?.session),
+        sessionError: sessionError?.message,
+      };
 
     if (sessionError) {
       console.error("Session error:", sessionError.message);
@@ -42,7 +43,7 @@ export async function getCurrentUser() {
     }
 
     if (!sessionData?.session) {
-      console.log("No active session found");
+      ("No active session found");
       return null;
     }
 
@@ -55,15 +56,16 @@ export async function getCurrentUser() {
     }
 
     if (!data?.user) {
-      console.log("No user found");
+      ("No user found");
       return null;
     }
 
-    console.log("User found:", {
-      id: data.user.id,
-      email: data.user.email,
-      hasUserMetadata: Boolean(data.user.user_metadata),
-    });
+    "User found:",
+      {
+        id: data.user.id,
+        email: data.user.email,
+        hasUserMetadata: Boolean(data.user.user_metadata),
+      };
 
     // Return the user with an explicit authenticated property
     return data.user;
@@ -74,7 +76,7 @@ export async function getCurrentUser() {
 }
 
 export async function logOut() {
-  console.log("Logout attempt");
+  ("Logout attempt");
 
   try {
     const { error } = await supabase.auth.signOut();
@@ -84,7 +86,7 @@ export async function logOut() {
       throw new Error(error.message);
     }
 
-    console.log("Logout successful");
+    ("Logout successful");
   } catch (error) {
     console.error("Unexpected error in logOut:", error);
     throw new Error("Something went wrong during logout");

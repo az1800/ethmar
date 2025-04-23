@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Header from "./Header";
-import dummypic from "../Assets/image copy.png";
-import { getPosts } from "../Services/postsAPI";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getPosts } from "../Services/postsAPI";
 
+// Types
 type Post = {
   id: number;
   Category: string | null;
@@ -14,92 +15,157 @@ type Post = {
   Post_Link: string;
 };
 
-export default function HeroSection() {
+type HeroProps = {
+  type: "post" | "title";
+  title?: string;
+  content?: string;
+  fetchPostCategory?: string;
+  defaultImage?: string;
+  categoryLabel?: string;
+  readMoreLabel?: string;
+};
+
+export default function HeroSection({
+  type = "title",
+  title,
+  content,
+  fetchPostCategory = "منشور مميز",
+  defaultImage = "/placeholder.png",
+  categoryLabel,
+  readMoreLabel = "اقرأ المزيد",
+}: HeroProps) {
   const [featuredPost, setFeaturedPost] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const { data, error } = await getPosts("منشور مميز");
-
-        if (error) {
-          console.error(error + " this is error");
-        } else {
-          setFeaturedPost(data);
+    // Only fetch posts if type is "post"
+    if (type === "post") {
+      const fetchPost = async () => {
+        setIsLoading(true);
+        try {
+          const { data, error } = await getPosts(fetchPostCategory);
+          if (error) {
+            console.error(error + " this is error");
+          } else {
+            setFeaturedPost(data);
+          }
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchPost();
-  }, []);
+      };
+      fetchPost();
+    }
+  }, [type, fetchPostCategory]);
 
-  const post = featuredPost.length > 0 ? featuredPost[0] : null;
-  // Enhanced HTML stripper
+  // Helper functions for post content
   function stripHtml(html: string): string {
     if (!html) return "";
     return html.replace(/<[^>]+>/g, "");
   }
 
-  // Truncate by character count instead of words
   function truncateContent(text: string, maxLength: number): string {
     if (!text) return "";
-
     // Clean up any excessive whitespace
     const cleanText = text.replace(/\s+/g, " ").trim();
-
     if (cleanText.length <= maxLength) return cleanText;
-
     // Cut at maxLength and try to find a space to break at
     const truncated = cleanText.substring(0, maxLength);
     const lastSpaceIndex = truncated.lastIndexOf(" ");
-
     if (lastSpaceIndex > maxLength * 0.8) {
       // If we can find a space in the last 20% of the text, break there
       return truncated.substring(0, lastSpaceIndex) + "...";
     }
-
     // Otherwise just break at maxLength
     return truncated + "...";
   }
 
-  // Process the content - use a longer length to accommodate multiple lines
-  const displayContent = post?.Content
-    ? truncateContent(stripHtml(post.Content), 300)
+  // For post type: extract current post
+  const displayPost =
+    type === "post" && featuredPost.length > 0 ? featuredPost[0] : null;
+
+  // For post type: process the content
+  const displayContent = displayPost?.Content
+    ? truncateContent(stripHtml(displayPost.Content), 300)
     : "No content available";
+
   return (
-    <div className="bg-gradient-to-r from-[rgb(31,104,44,90)] to-[#164B20] text-white min-h-[70vh]">
+    <div className="flex flex-col bg-gradient-to-r from-emerald-700 to-green-900 overflow-hidden min-h-[60vh] lg:h-[60vh] md:h-[60vh] sm:min-h-[60vh]">
       <Header />
 
-      {/* Main Content */}
-      {post && (
-        <div className="flex flex-col lg:flex-row md:flex-col justify-between items-start py-4 px-6 md:py-7 md:px-14">
-          <img
-            src={post ? post.post_image : dummypic.src}
-            alt="رجل يعمل على الحاسوب"
-            className="w-[32.1875rem] h-[22.4375rem] object-cover rounded lg:mx-0 sm:block sm:mx-auto"
-            height={200}
-            width={200}
-          />
-          <div className="max-w-xl text-right sm:mx-auto lg:mx-0">
-            <p className="mb-8">{post ? post.Category : "التصنيف غير متوفر"}</p>
-            <h1 className="text-3xl font-bold mb-8">
-              {post ? post.Title : "عنوان غير متوفر"}
-            </h1>
+      {/* Decorative pattern overlay */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJ3aGl0ZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMzYgMzRoLTJ2LTRoMnY0em0wLTZoLTJ2LTRoMnY0em0wLTZoLTJWNmgydjEwem0tNiA2aC0ydi00aDJ2NHptMC02aC0ydi00aDJ2NHptMC02aC0yVjZoMnYxMHoiLz48L2c+PC9zdmc+')]"></div>
 
-            <p className="mb-8" dir="rtl">
-              {post ? displayContent : "المحتوى غير متوفر"}
-            </p>
-            {post && (
-              <Link href={`/Post?id=${post.id}`}>
-                <button
-                  type="button"
-                  className="inline-block w-[175px] px-[45px] py-[16px] text-center rounded-lg bg-black text-white"
-                >
-                  &lt; اقرأ المزيد
-                </button>
-              </Link>
+      {type === "post" ? (
+        <div className=" container m-auto px-6  flex items-center">
+          <div className="flex flex-col-reverse lg:flex-row justify-between items-center w-full">
+            {/* If a direct post object is provided, use it, otherwise use the fetched post */}
+            {displayPost && (
+              <div className="flex flex-col lg:flex-row justify-between items-center w-full gap-12">
+                {/* Image part - shown on the left in desktop */}
+                <div className="lg:w-1/3">
+                  <div className="overflow-hidden rounded-2xl shadow-lg transition-transform duration-500 hover:scale-105">
+                    <img
+                      src={displayPost.post_image || defaultImage}
+                      alt={displayPost.Title || "صورة المنشور"}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                </div>
+
+                {/* Text content */}
+                <div className="lg:w-1/2 text-right space-y-5">
+                  {/* Category */}
+                  <p className="text-sm text-emerald-200 tracking-wider uppercase">
+                    {displayPost.Category || categoryLabel || "منشور مميز"}
+                  </p>
+
+                  {/* Title */}
+                  <h1
+                    className="text-4xl font-bold font-arabic text-white leading-snug"
+                    dir="rtl"
+                  >
+                    {displayPost.Title || "عنوان المنشور"}
+                  </h1>
+
+                  {/* Content */}
+                  <p
+                    className="text-lg text-white/90 leading-relaxed font-arabic"
+                    dir="rtl"
+                  >
+                    {displayContent}
+                  </p>
+
+                  {/* Read more button */}
+                  <Link href={`/Post?id=${displayPost.id}`}>
+                    <button
+                      type="button"
+                      className="px-6 py-2 my-9 bg-white text-green-900 rounded-md font-semibold hover:bg-emerald-100 transition-all duration-300 shadow-md"
+                    >
+                      {readMoreLabel}
+                    </button>
+                  </Link>
+                </div>
+              </div>
             )}
+          </div>
+        </div>
+      ) : (
+        <div className="container m-auto px-6 flex items-center">
+          <div className="max-w-3xl m-auto text-center ">
+            <h1
+              className="text-4xl md:text-5xl font-bold text-white mb-8 font-arabic"
+              dir="rtl"
+            >
+              {title}
+            </h1>
+            <p
+              className="text-xl md:text-2xl text-white/90 leading-relaxed font-arabic"
+              dir="rtl"
+            >
+              {content}
+            </p>
           </div>
         </div>
       )}

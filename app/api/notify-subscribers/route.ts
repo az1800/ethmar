@@ -10,23 +10,23 @@ const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function POST(request: Request) {
   try {
-    console.log("Notification request received");
+    ("Notification request received");
 
     // Parse the request body
     const { postId, category, title } = await request.json();
 
     if (!postId || !title) {
-      console.log("Missing postId or title in request");
+      ("Missing postId or title in request");
       return NextResponse.json(
         { error: "Missing required fields: postId and title are required" },
         { status: 400 }
       );
     }
 
-    console.log("Processing notification request:");
-    console.log("- Post ID:", postId);
-    console.log("- Category:", category);
-    console.log("- Title:", title);
+    ("Processing notification request:");
+    "- Post ID:", postId;
+    "- Category:", category;
+    "- Title:", title;
 
     // Get the post details - we need full details for the email
     let postDetails;
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
       // If we can't get full details but have minimal info, use that
       if (category && title) {
-        console.log("Using minimal post details provided in request");
+        ("Using minimal post details provided in request");
         postDetails = {
           Category: category,
           Title: title,
@@ -74,14 +74,14 @@ export async function POST(request: Request) {
     }
 
     if (!subscribers || subscribers.length === 0) {
-      console.log("No active subscribers found");
+      ("No active subscribers found");
       return NextResponse.json(
         { message: "No active subscribers found" },
         { status: 200 }
       );
     }
 
-    console.log(`Found ${subscribers.length} active subscribers`);
+    `Found ${subscribers.length} active subscribers`;
 
     // Create the post URL
     const postUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://ethmar.xyz"}/Post?id=${postId}`;
@@ -98,7 +98,7 @@ export async function POST(request: Request) {
         batches.push(subscribers.slice(i, i + batchSize));
       }
 
-      console.log(`Processing ${batches.length} batches of emails`);
+      `Processing ${batches.length} batches of emails`;
 
       // Process each batch sequentially
       for (const batch of batches) {
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
                   .trim() + "...";
             }
 
-            console.log(`Sending email to subscriber: ${subscriber.email}`);
+            `Sending email to subscriber: ${subscriber.email}`;
 
             const emailComponent = NewPostEmail({
               email: subscriber.email,
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
         ).length;
         emailsSent += successfulInBatch;
 
-        console.log(`Batch completed: ${successfulInBatch} emails sent`);
+        `Batch completed: ${successfulInBatch} emails sent`;
 
         // Add a small delay between batches to avoid rate limits
         if (batches.length > 1) {
@@ -177,9 +177,7 @@ export async function POST(request: Request) {
     }
 
     // Simply log to console instead of creating a dedicated logs table
-    console.log(
-      `Notification stats: ${emailsSent} of ${subscribers.length} emails sent for post ${postId}`
-    );
+    `Notification stats: ${emailsSent} of ${subscribers.length} emails sent for post ${postId}`;
 
     return NextResponse.json({
       success: true,

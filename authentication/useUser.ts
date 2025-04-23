@@ -11,10 +11,10 @@ export function useUser() {
   } = useQuery({
     queryKey: ["user"],
     queryFn: async () => {
-      console.log("Fetching user data...");
+      ("Fetching user data...");
       try {
         const userData = await getCurrentUser();
-        console.log("User data received:", userData);
+        "User data received:", userData;
         return userData;
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -25,13 +25,13 @@ export function useUser() {
     refetchOnWindowFocus: false,
   });
 
-  console.log("useUser hook - current state:", { user, error, isLoading });
+  "useUser hook - current state:", { user, error, isLoading };
 
   // Check authentication status
   const isAuthenticated = Boolean(user);
 
-  console.log("isAuthenticated:", isAuthenticated);
-  console.log("user:", user);
+  "isAuthenticated:", isAuthenticated;
+  "user:", user;
 
   if (error) {
     console.error("Authentication error:", error);

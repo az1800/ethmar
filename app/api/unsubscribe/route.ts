@@ -10,14 +10,14 @@ const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export async function POST(request: Request) {
   try {
-    console.log("Unsubscribe request received");
+    ("Unsubscribe request received");
 
     // Parse the request body
     const body = await request.json();
     let { email, token } = body;
 
     if (!email || !token) {
-      console.log("Missing email or token in request");
+      ("Missing email or token in request");
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -28,9 +28,9 @@ export async function POST(request: Request) {
     email = email.trim().toLowerCase();
     token = token.trim();
 
-    console.log("Processing unsubscribe request:");
-    console.log("- Email:", email);
-    console.log("- Token:", token);
+    ("Processing unsubscribe request:");
+    "- Email:", email;
+    "- Token:", token;
 
     // First check if the email and token combination exists
     const { data: subscribers, error: fetchError } = await supabase
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     // If no matching records found
     if (!subscribers || subscribers.length === 0) {
-      console.log("No matching subscriber found with email and token");
+      ("No matching subscriber found with email and token");
       return NextResponse.json(
         { error: "Invalid or expired token" },
         { status: 401 }
@@ -57,11 +57,11 @@ export async function POST(request: Request) {
     }
 
     const subscriber = subscribers[0];
-    console.log("Found matching subscriber:", subscriber.id);
+    "Found matching subscriber:", subscriber.id;
 
     // Check if already unsubscribed
     if (subscriber.subscribed === false) {
-      console.log("Subscriber already unsubscribed");
+      ("Subscriber already unsubscribed");
       return NextResponse.json({
         success: true,
         message: "Already unsubscribed",
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       unsubscribed_at: new Date().toISOString(),
     };
 
-    console.log("Updating subscriber with data:", updateData);
+    "Updating subscriber with data:", updateData;
 
     // Update the specific record by ID for more reliability
     const { error: updateError } = await supabase
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Successfully updated subscriber:", subscriber.id);
+    "Successfully updated subscriber:", subscriber.id;
 
     // Send confirmation email if Resend is initialized
 
@@ -110,7 +110,7 @@ export async function POST(request: Request) {
           subject: "تأكيد إلغاء الاشتراك",
           react: emailComponent,
         });
-        console.log("Sent unsubscribe confirmation email to:", email);
+        "Sent unsubscribe confirmation email to:", email;
       } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
       }
