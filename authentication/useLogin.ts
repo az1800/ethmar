@@ -42,7 +42,6 @@ export function useLogin() {
     mutationFn: ({ email, password }: LoginCredentials) =>
       loginAPI({ email, password }),
     onSuccess: (data) => {
-      "Login successful", data;
       // Show success notification
       showNotification({
         type: "success",

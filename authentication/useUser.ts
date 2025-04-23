@@ -14,7 +14,7 @@ export function useUser() {
       ("Fetching user data...");
       try {
         const userData = await getCurrentUser();
-        "User data received:", userData;
+
         return userData;
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -25,13 +25,8 @@ export function useUser() {
     refetchOnWindowFocus: false,
   });
 
-  "useUser hook - current state:", { user, error, isLoading };
-
   // Check authentication status
   const isAuthenticated = Boolean(user);
-
-  "isAuthenticated:", isAuthenticated;
-  "user:", user;
 
   if (error) {
     console.error("Authentication error:", error);
