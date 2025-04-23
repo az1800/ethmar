@@ -64,8 +64,6 @@ export async function postArticle(
   postImage?: string
 ) {
   try {
-    "Creating new article:", title;
-
     // First insert with temporary link
     const { data, error } = await supabase
       .from("Posts")
@@ -91,8 +89,6 @@ export async function postArticle(
       const postId = data[0].id;
 
       try {
-        "Sending notification for new post:", postId;
-
         // Call the notify-subscribers API endpoint using fetch
         // Make sure we're handling both server-side and client-side environments
         const baseUrl =
@@ -120,7 +116,6 @@ export async function postArticle(
           );
         } else {
           const result = await response.json();
-          "Notification result:", result;
         }
       } catch (notifyError) {
         // Log the error but don't fail the post creation
