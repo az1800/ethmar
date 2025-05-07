@@ -2,6 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import getMembers from "../Services/membersAPI";
 import Card from "./Card";
+import { Plus } from "lucide-react";
 
 interface Member {
   id: number;
@@ -189,6 +190,15 @@ const Members: React.FC<MembersProps> = ({ type = "regular" }) => {
   if (type === "dashboard") {
     return (
       <>
+        <div className="flex justify-between items-center mb-6" dir="rtl">
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            إدارة آلأعضاء
+          </h1>
+          <button className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+            <Plus size={18} className="ml-2" />
+            <span className="font-arabic">إضافة عضو جديد</span>
+          </button>
+        </div>
         {/* 🔹 Render each committee with its members */}
         <div className="flex flex-col gap-16" dir="rtl">
           {Object.entries(committees).map(

@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import manPlaceholder from "../Assets/man-placeholder.svg";
 import womanPlaceholder from "../Assets/woman-placeholder.svg";
+// import placeHolder from "../Assets/transparent.png";
 
 // import getMembers from "../Services/membersAPI";
 type MemberCardProps = {
@@ -46,7 +47,8 @@ export default function Card({
 
       <h1 className="text-lg font-semibold mx-auto w-fit">{name}</h1>
       {position && (
-        <p className="w-fit mx-auto text-center">
+        // <p className="w-fit mx-auto text-center">
+        <p className="mx-auto text-center">
           {`${position}
          ${
            committee && committee !== "قادة الفرق"

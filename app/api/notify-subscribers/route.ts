@@ -100,7 +100,7 @@ export async function POST(request: Request) {
         const emailPromises = batch.map(async (subscriber) => {
           try {
             // Get post image if not already provided
-            let postImage = postDetails.post_image || "";
+            const postImage = postDetails.post_image || "";
 
             // Get post excerpt - first 150 characters of content
             let postExcerpt = "";

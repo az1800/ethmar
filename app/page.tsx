@@ -9,7 +9,7 @@ export default function Home() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      router.push("/blog");
+      router.push("https://ethmarspp.stuclubs.com/home");
     }
   }, [router]);
 

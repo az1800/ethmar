@@ -73,14 +73,6 @@ export async function getPostCountsByCategory() {
     ithmarPicks: 0,
     featuredPost: 0,
   };
-
-  // Count posts per category
-  // data.forEach((post) => {
-  //   const categoryKey = categoryMapping[post.Category];
-  //   if (categoryKey) {
-  //     counts[categoryKey]++;
-  //   }
-  // });
   type CategoryName =
     | "تحليل القطاعات"
     | "البحوث المالية"
@@ -98,4 +90,76 @@ export async function getPostCountsByCategory() {
   });
 
   return counts;
+}
+
+/**
+ * Add to the database
+ */
+export async function addMember(
+  name: string,
+  position: string,
+  gender: string,
+  committee?: string
+) {
+  const { data, error } = await supabase
+    .from("Members")
+    .insert([
+      {
+        full_Name: name,
+        Position: position,
+        Committee: committee,
+        Gender: gender,
+      },
+    ])
+    .select();
+
+  if (error) {
+    console.error("Error adding member:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+/**
+ * Update in the database
+ */
+export async function updateMember(
+  id: number,
+  name: string,
+  position: string,
+  gender: string,
+  committee?: string
+) {
+  const { data, error } = await supabase
+    .from("Members")
+    .update({
+      full_Name: name,
+      Position: position,
+      Committee: committee,
+      Gender: gender,
+    })
+    .eq("id", id)
+    .select();
+
+  if (error) {
+    console.error("Error updating member:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
+}
+
+/**
+ * Delete a from the database
+ */
+export async function deleteMember(id: number) {
+  const { data, error } = await supabase.from("Members").delete().eq("id", id);
+
+  if (error) {
+    console.error("Error deleting member:", error);
+    throw new Error(error.message);
+  }
+
+  return data;
 }
