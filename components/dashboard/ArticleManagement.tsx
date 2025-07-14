@@ -11,6 +11,7 @@ import {
 // import { useRouter } from "next/router";
 import { useRouter } from "next/navigation";
 import { getPosts, deletePost } from "@/Services/postsAPI"; // Adjust the import based on your project structure
+import Loader from "../Loader";
 
 // Define types for the article structure
 interface Article {
@@ -232,7 +233,9 @@ const ArticleManagement: React.FC = () => {
       article.Title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       article.Category.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
+  if (loading) {
+    return <Loader />;
+  }
   return (
     // <div className="max-w-7xl mx-auto px-4 py-8">
     <div className=" mx-auto ">
@@ -250,41 +253,8 @@ const ArticleManagement: React.FC = () => {
         </button>
       </div>
 
-      {/* Search and Filter */}
-      {/* <div className="flex flex-col md:flex-row gap-4 mb-6" dir="rtl">
-        <div className="flex-1 relative">
-          <Search size={20} className="absolute top-3 right-3 text-gray-400" />
-          <input
-            type="text"
-            placeholder="ابحث عن مقالات..."
-            className="w-full pl-4 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        <div className="w-full md:w-64 relative">
-          <Filter size={20} className="absolute top-3 right-3 text-gray-400" />
-          <select
-            className="w-full pl-4 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white appearance-none"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div> */}
-
       {/* Articles Grid */}
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
-        </div>
-      ) : filteredArticles.length > 0 ? (
+      {filteredArticles.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredArticles.map((article) => (
             <ArticleCard

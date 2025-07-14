@@ -2,13 +2,18 @@ import React from "react";
 import { Plus, Award } from "lucide-react";
 import { AchievementsListProps } from "./types";
 import AchievementCard from "./AchievementCard";
+import Loader from "../Loader";
 
 const AchievementsList: React.FC<AchievementsListProps> = ({
   achievements,
   onEdit,
   onDelete,
   onAddNew,
+  loading = false,
 }) => {
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div>
       <div className="flex justify-between items-center mb-6" dir="rtl">

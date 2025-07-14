@@ -7,9 +7,12 @@ import {
   Users,
   Home,
 } from "lucide-react"; // ✨ Import Home icon
+import { FaRegHandPointer } from "react-icons/fa";
+
 import { SidebarProps } from "./types";
 // import { useRouter } from "next/router"; // ✨ Import useRouter
 import { useRouter } from "next/navigation"; // ✅ for App Router
+import { FaHandPointer } from "react-icons/fa";
 
 const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const router = useRouter(); // ✨ Initialize router
@@ -49,7 +52,18 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     {
       id: "members",
       icon: <Users size={20} className="ml-3" style={{ color: "#2C953F" }} />,
-      label: "الأعضاء",
+      label: "القادة",
+    },
+    {
+      id: "hero-texts",
+      icon: (
+        <FaRegHandPointer
+          size={20}
+          className="ml-3"
+          style={{ color: "#2C953F" }}
+        />
+      ),
+      label: "النصوص الرئيسية",
     },
   ];
 

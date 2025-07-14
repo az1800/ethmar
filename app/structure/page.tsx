@@ -2,20 +2,26 @@ import Footer from "@/components/Footer";
 import Header from "../../components/Header";
 import Members from "../../components/Members";
 import HeroSection from "@/components/HeroSection";
+import { fetchHeroSectiondata } from "@/Services/heroSectionsAPI";
 
-export default function page() {
+export default async function page() {
+  let heroData = null;
+
+  try {
+    // Fetch hero section data for the partners page
+    heroData = await fetchHeroSectiondata("الهيكلة"); // or whatever page_title you use for partners
+  } catch (error) {
+    console.error("Failed to fetch hero section data:", error);
+    // Fallback to default content if fetch fails
+  }
   return (
     <>
       <>
         <div className="my-auto">
           <HeroSection
             type="title"
-            title="من نحن"
-            content="إثمار هي مبادرة مالية طلابية بجامعة الملك سعود تحت برنامج الشراكة
-            الطلابية، تهدف إلى نشر الوعي المالي وتعزيز مهارات التخطيط المالي لدى
-            الشباب، مما يمكنهم من اتخاذ قرارات مالية مستدامة تسهم في تحقيق
-            تطلعاتهم المستقبلية، تماشيًا مع رؤية المملكة 2030 وبرنامج تطوير
-            القطاع المالي"
+            title={heroData?.title || "الهيكلة"}
+            content={heroData?.description || "تعرف على هيكلية فريقنا"}
           />{" "}
         </div>
       </>

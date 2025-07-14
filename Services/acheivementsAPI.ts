@@ -1,22 +1,11 @@
 import supabase from "./supabase";
 import { Achievement, FormData } from "../components/dashboard/types";
-// export interface Achievement {
-//   id: number;
-//   title: string;
-//   description: string;
-//   date: string;
-//   image_url?: string;
-//   created_at?: string;
-// }
 
-// export interface FormData {
-//   title: string;
-//   description: string;
-//   date: string;
-//   image_url?: string;
-// }
 export default async function getAcheivements() {
-  let { data, error } = await supabase.from("achievements").select("*");
+  let { data, error } = await supabase
+    .from("achievements")
+    .select("*")
+    .order("date", { ascending: true });
   if (error) {
   }
   return data;
@@ -29,7 +18,7 @@ export const fetchAchievements = async (): Promise<Achievement[]> => {
     const { data, error } = await supabase
       .from(ACHIEVEMENTS_TABLE)
       .select("*")
-      .order("date", { ascending: false });
+      .order("date", { ascending: true });
 
     if (error) {
       throw error;
@@ -42,115 +31,6 @@ export const fetchAchievements = async (): Promise<Achievement[]> => {
   }
 };
 
-// Add a new achievement
-// export const addAchievement = async (
-//   formData: FormData
-// ): Promise<Achievement> => {
-//   try {
-//     // If there's an image as base64 string, upload it to storage first
-//     let image_url = formData.image_url;
-
-//     if (image_url && image_url.startsWith("data:image")) {
-//       image_url = await uploadImage(image_url);
-//     }
-
-//     const achievementData = {
-//       title: formData.title,
-//       description: formData.description,
-//       date: formData.date,
-//       image_url: image_url,
-//       created_at: new Date().toISOString(),
-//     };
-
-//     const { data, error } = await supabase
-//       .from(ACHIEVEMENTS_TABLE)
-//       .insert([achievementData])
-//       .select();
-
-//     if (error) {
-//       throw error;
-//     }
-
-//     return data[0];
-//   } catch (error) {
-//     console.error("Error adding achievement:", error);
-//     throw error;
-//   }
-// };
-
-// export const addAchievement = async (
-//   formData: FormData
-// ): Promise<Achievement> => {
-//   try {
-//     let image_url = formData.image_url;
-
-//     if (image_url && image_url.startsWith("data:image")) {
-//       image_url = await uploadImage(image_url);
-//     }
-
-//     const achievementData = {
-//       title: formData.title,
-//       description: formData.description,
-//       date: formData.date,
-//       image_url: image_url,
-//       icon: formData.icon,
-//       created_at: new Date().toISOString(),
-//     };
-
-//     const { data, error } = await supabase
-//       .from("achievements")
-//       .insert([achievementData])
-//       .select()
-//       .single();
-
-//     if (error) throw error;
-//     if (!data) throw new Error("No data returned from insert");
-
-//     return data;
-//   } catch (error) {
-//     console.error("Error adding achievement:", error);
-//     throw error;
-//   }
-// };
-// // Update an existing achievement
-// export const updateAchievement = async (
-//   id: number,
-//   formData: FormData
-// ): Promise<Achievement> => {
-//   try {
-//     let image_url = formData.image_url;
-
-//     if (image_url && image_url.startsWith("data:image")) {
-//       image_url = await uploadImage(image_url);
-//     }
-
-//     const achievementData = {
-//       title: formData.title,
-//       description: formData.description,
-//       date: formData.date,
-//       image_url: image_url,
-//       icon: formData.icon,
-//       updated_at: new Date().toISOString(),
-//     };
-
-//     const { data, error } = await supabase
-//       .from("achievements")
-//       .update(achievementData)
-//       .eq("id", id)
-//       .select()
-//       .single();
-
-//     if (error) throw error;
-//     if (!data) throw new Error("No data returned from update");
-
-//     return data;
-//   } catch (error) {
-//     console.error("Error updating achievement:", error);
-//     throw error;
-//   }
-// };
-
-// Delete an achievement
 export const deleteAchievement = async (id: number): Promise<void> => {
   try {
     // Get the achievement to delete its image if exists

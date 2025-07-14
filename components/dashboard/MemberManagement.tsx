@@ -9,6 +9,7 @@ import {
   updateMember,
   deleteMember,
 } from "../../Services/dashboard";
+import Loader from "../Loader";
 interface MemberManagementProps {
   members: Member[];
   onRefresh: () => Promise<void>;
@@ -81,7 +82,9 @@ export default function MemberManagement({
       setLoading(false);
     }
   };
-
+  if (loading) {
+    return <Loader />;
+  }
   return (
     <div className="space-y-6">
       {showForm ? (
@@ -95,14 +98,14 @@ export default function MemberManagement({
         <>
           <div className="flex justify-between items-center mb-6" dir="rtl">
             <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-              إدارة الأعضاء
+              إدارة القادة
             </h2>
             <button
               onClick={handleAddMember}
               className="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
             >
               <Plus size={18} className="ml-2" />
-              <span className="font-arabic">إضافة عضو جديد</span>
+              <span className="font-arabic">إضافة قائد جديد</span>
             </button>
           </div>
 
