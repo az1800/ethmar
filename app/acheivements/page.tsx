@@ -11,6 +11,9 @@ import {
   fetchHeroSectiondata,
   fetchHeroSections,
 } from "@/Services/heroSectionsAPI";
+import ErrorPopup from "@/components/ErrorPopup";
+import { usePopup } from "@/Hooks/usePopup";
+
 export interface Achievement {
   id: number;
   title: string;
@@ -35,7 +38,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [heroSection, setHeroSection] = useState<HeroSectionData>();
   const [error, setError] = useState<string | null>(null);
-
+  const { popup, hidePopup, showError } = usePopup();
   // Add a viewport meta tag for better mobile display
   useEffect(() => {
     // Check if there's an existing viewport meta tag
@@ -51,59 +54,57 @@ export default function Page() {
       document.head.appendChild(newMeta);
     }
 
-    // Fetch achievements data
-    const fetchAchievements = async () => {
+    // Fetch both achievements and hero section data
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getAchievements();
-        setAchievements(data || []);
-        setLoading(false);
-      } catch (err) {
-        console.error("Failed to fetch achievements:", err);
-        setError("Failed to load achievements. Please try again later.");
-        setLoading(false);
-      }
-    };
 
-    fetchAchievements();
-    const fetchHeroSectionData = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchHeroSectiondata("إنجازاتنا");
-        setHeroSection(data);
+        // Fetch both data sources in parallel
+        const [achievementsData, heroSectionData] = await Promise.all([
+          getAchievements(),
+          fetchHeroSectiondata("إنجازاتنا"),
+        ]);
+
+        setAchievements(achievementsData || []);
+        setHeroSection(heroSectionData);
       } catch (err) {
-        console.error("Failed to fetch hero section's data:", err);
-        setError(
-          "Failed to fetch hero section's data. Please try again later."
+        console.error("Failed to fetch data:", err);
+
+        // Show error popup instead of just setting error state
+        showError(
+          "فشل في تحميل البيانات. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.",
+          {
+            title: "خطأ في التحميل",
+            showRetry: true,
+            onRetry: () => {
+              hidePopup();
+              fetchData(); // Retry the fetch
+            },
+            autoClose: false, // Don't auto-close for errors
+          }
         );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHeroSectionData();
-  }, []);
-  useEffect(() => {
-    const fetchHeroSectionData = async () => {
-      try {
-        setLoading(true);
-        const data = await getAchievements();
-        setAchievements(data || []);
-      } catch (err) {
-        console.error("Failed to fetch hero section's data:", err);
-        setError(
-          "Failed to fetch hero section's data. Please try again later."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchHeroSectionData();
-  }, []);
+    fetchData();
+  }, [showError, hidePopup]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      <ErrorPopup
+        isOpen={popup.isOpen}
+        onClose={hidePopup}
+        type={popup.type}
+        title={popup.title}
+        message={popup.message}
+        autoClose={popup.autoClose}
+        duration={popup.duration}
+        showRetry={popup.showRetry}
+        onRetry={popup.onRetry}
+      />
+
       {/* Hero section with enhanced gradient */}
       <HeroSection
         type="title"
@@ -116,20 +117,7 @@ export default function Page() {
           <Loader />
         </div>
       ) : error ? (
-        <div className="container mx-auto py-16 px-4 text-center">
-          <div className="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg max-w-md mx-auto">
-            <p className="text-red-600 dark:text-red-400 font-arabic" dir="rtl">
-              {error}
-            </p>
-            <button
-              className="mt-4 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md transition-colors font-arabic"
-              onClick={() => window.location.reload()}
-              dir="rtl"
-            >
-              إعادة المحاولة
-            </button>
-          </div>
-        </div>
+        <></>
       ) : achievements.length === 0 ? (
         <div className="container mx-auto py-16 px-4 text-center">
           <p className="text-gray-600 dark:text-gray-300 font-arabic" dir="rtl">
