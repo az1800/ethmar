@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 // import { useRouter } from "next/router";
 import { useRouter } from "next/navigation";
-import { getPosts, deletePost } from "@/Services/postsAPI"; // Adjust the import based on your project structure
+import { getPosts, deletePost, getPostsDashboard } from "@/Services/postsAPI"; // Adjust the import based on your project structure
 import Loader from "../Loader";
 
 // Define types for the article structure
@@ -33,7 +33,7 @@ const fetchPosts = async (
   category: string | null = null
 ): Promise<ApiResponse> => {
   try {
-    const { data, error } = await getPosts(category);
+    const { data, error } = await getPostsDashboard(category);
 
     return { data, error };
   } catch (error) {
