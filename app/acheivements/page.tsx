@@ -11,8 +11,6 @@ import {
   fetchHeroSectiondata,
   fetchHeroSections,
 } from "@/Services/heroSectionsAPI";
-import ErrorPopup from "@/components/ErrorPopup";
-import { usePopup } from "@/Hooks/usePopup";
 
 export interface Achievement {
   id: number;
@@ -38,7 +36,7 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [heroSection, setHeroSection] = useState<HeroSectionData>();
   const [error, setError] = useState<string | null>(null);
-  const { popup, hidePopup, showError } = usePopup();
+
   // Add a viewport meta tag for better mobile display
   useEffect(() => {
     // Check if there's an existing viewport meta tag
@@ -69,42 +67,16 @@ export default function Page() {
         setHeroSection(heroSectionData);
       } catch (err) {
         console.error("Failed to fetch data:", err);
-
-        // Show error popup instead of just setting error state
-        showError(
-          "فشل في تحميل البيانات. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.",
-          {
-            title: "خطأ في التحميل",
-            showRetry: true,
-            onRetry: () => {
-              hidePopup();
-              fetchData(); // Retry the fetch
-            },
-            autoClose: false, // Don't auto-close for errors
-          }
-        );
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [showError, hidePopup]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 dark:from-gray-900 dark:to-gray-800">
-      <ErrorPopup
-        isOpen={popup.isOpen}
-        onClose={hidePopup}
-        type={popup.type}
-        title={popup.title}
-        message={popup.message}
-        autoClose={popup.autoClose}
-        duration={popup.duration}
-        showRetry={popup.showRetry}
-        onRetry={popup.onRetry}
-      />
-
       {/* Hero section with enhanced gradient */}
       <HeroSection
         type="title"
