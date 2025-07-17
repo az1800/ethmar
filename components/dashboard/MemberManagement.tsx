@@ -10,6 +10,7 @@ import {
   deleteMember,
 } from "../../Services/dashboard";
 import Loader from "../Loader";
+import { useNotification } from "../Notification";
 interface MemberManagementProps {
   members: Member[];
   onRefresh: () => Promise<void>;
@@ -22,7 +23,7 @@ export default function MemberManagement({
   const [showForm, setShowForm] = useState<boolean>(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const { showNotification } = useNotification();
   const handleAddMember = () => {
     setEditingMember(null);
     setShowForm(true);
@@ -34,14 +35,21 @@ export default function MemberManagement({
   };
 
   const handleDeleteMember = async (id: number) => {
-    if (window.confirm("هل أنت متأكد من حذف هذا العضو؟")) {
+    if (window.confirm("هل أنت متأكد من حذف هذا القائد؟")) {
       try {
         setLoading(true);
         deleteMember(id);
         await onRefresh();
         setLoading(false);
+        showNotification({
+          message: "!تم حذف القائد بنجاح",
+          type: "success",
+        });
       } catch (error) {
-        console.error("Error deleting member:", error);
+        showNotification({
+          message: "فشل في حذف القائد، يرجى المحاولة لاحقًا",
+          type: "error",
+        });
         setLoading(false);
       }
     }
@@ -63,6 +71,12 @@ export default function MemberManagement({
           data.Gender,
           data.Committee || ""
         );
+
+        // Show success notification for update
+        showNotification({
+          message: "تم تحديث بيانات القائد بنجاح!",
+          type: "success",
+        });
       } else {
         // Handle adding new member
         await addMember(
@@ -71,6 +85,12 @@ export default function MemberManagement({
           data.Gender,
           data.Committee || ""
         );
+
+        // Show success notification for add
+        showNotification({
+          message: "تمت إضافة قائد جديد بنجاح!",
+          type: "success",
+        });
       }
 
       await onRefresh();
@@ -78,7 +98,12 @@ export default function MemberManagement({
       setEditingMember(null);
       setLoading(false);
     } catch (error) {
-      console.error("Error submitting member:", error);
+      // Show error notification
+      showNotification({
+        message: "فشل في حفظ القائد، يرجى المحاولة لاحقًا",
+        type: "error",
+      });
+
       setLoading(false);
     }
   };
@@ -170,13 +195,6 @@ export default function MemberManagement({
                             alt={member.full_Name}
                             className="h-10 w-10 rounded-full object-cover"
                           />
-                          {/* ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                              <span className="text-gray-500 dark:text-gray-400">
-                                {member.full_Name.charAt(0)}
-                              </span>
-                            </div>
-                          )} */}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <div className="text-sm font-medium text-gray-900 dark:text-white">

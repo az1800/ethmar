@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 import { getPosts, deletePost, getPostsDashboard } from "@/Services/postsAPI"; // Adjust the import based on your project structure
 import Loader from "../Loader";
+import { useNotification } from "../Notification";
 
 // Define types for the article structure
 interface Article {
@@ -152,7 +153,7 @@ const ArticleManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
-
+  const { showNotification } = useNotification();
   // Categories based on your previous code
   const categories: string[] = [
     "الكل",
@@ -201,14 +202,6 @@ const ArticleManagement: React.FC = () => {
     setConfirmDelete(id);
   };
 
-  // const confirmDeleteArticle = async (): Promise<void> => {
-  //   if (!confirmDelete) return;
-
-  //   // Here you would call your API to delete the article
-  //   // For now, we'll just remove it from the local state
-  //   setArticles(articles.filter((article) => article.id !== confirmDelete));
-  //   setConfirmDelete(null);
-  // };
   const confirmDeleteArticle = async (): Promise<void> => {
     if (!confirmDelete) return;
 
@@ -224,6 +217,10 @@ const ArticleManagement: React.FC = () => {
       console.error("Unexpected error during deletion:", error);
     } finally {
       setConfirmDelete(null);
+      showNotification({
+        message: "!تم حذف المقال بنجاح",
+        type: "success",
+      });
     }
   };
 

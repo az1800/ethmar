@@ -11,6 +11,7 @@ import getPartners, {
 import Card from "./Card";
 import { Edit, Trash, Plus } from "lucide-react";
 import Loader from "./Loader";
+import { useNotification } from "./Notification";
 
 // Use the Partner interface from the API file
 type Company = Partner;
@@ -39,7 +40,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({
 }) => {
   const [visible, setVisible] = useState<boolean>(false);
   const cardRef = useRef<HTMLDivElement>(null);
-
+  const { showNotification } = useNotification();
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -247,7 +248,7 @@ export default function Companies({ type }: CompaniesProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
-
+  const { showNotification } = useNotification();
   // Force dashboard mode if type is "dashboard"
   const isDashboard = type === "dashboard";
 
@@ -296,15 +297,23 @@ export default function Companies({ type }: CompaniesProps) {
           companyData.Company_name || "",
           companyData.Company_Logo || ""
         );
-        console.log("Company updated successfully");
+
+        showNotification({
+          message: "!تم تحديث شريك النجاح بنجاح",
+          type: "success",
+        });
       } else {
         // Add new company
-        console.log("Adding new company:", companyData);
+
         await addPartner(
           companyData.Company_name || "",
           companyData.Company_Logo || ""
         );
-        console.log("Company added successfully");
+
+        showNotification({
+          message: "!تم إضافة شريك نجاح جديد بنجاح",
+          type: "success",
+        });
       }
 
       // Refresh the companies list
@@ -314,36 +323,48 @@ export default function Companies({ type }: CompaniesProps) {
       setIsModalOpen(false);
       setSelectedCompany(null);
     } catch (error) {
-      console.error("Error saving company:", error);
-      setError("Failed to save partner. Please try again.");
+      showNotification({
+        message: "!فشل حفظ الشريك، يرجى المحاولة لاحقًا",
+        type: "error",
+      });
+
       setDebugInfo(error instanceof Error ? error.message : String(error));
     } finally {
+      showNotification({
+        message: "!تمت إضافة شريك نجاح جديد بنجاح",
+        type: "success",
+      });
       setIsSubmitting(false);
     }
   };
 
   // Handler for editing a company
   const handleEditCompany = (company: Company) => {
-    console.log("Edit company clicked:", company);
     setSelectedCompany(company);
     setIsModalOpen(true);
   };
 
   // Handler for deleting a company
   const handleDeleteCompany = async (id: number) => {
-    console.log("Delete company clicked, id:", id);
     if (window.confirm("هل أنت متأكد من رغبتك في حذف هذا الشريك؟")) {
       setIsLoading(true);
       setError(null);
       setDebugInfo(null);
       try {
-        console.log("Deleting company with id:", id);
         await deletePartner(id);
-        console.log("Company deleted successfully");
+        showNotification({
+          message: "!تم حذف الشريك بنجاح",
+          type: "success",
+        });
         await fetchCompanies();
       } catch (error) {
         console.error("Error deleting company:", error);
         setError("Failed to delete partner. Please try again.");
+        showNotification({
+          message: "!فشل حذف الشريك، يرجى المحاولة لاحقًا",
+          type: "error",
+        });
+
         setDebugInfo(error instanceof Error ? error.message : String(error));
       } finally {
         setIsLoading(false);
