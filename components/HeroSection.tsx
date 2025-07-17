@@ -104,12 +104,12 @@ export default function HeroSection({
             {displayPost && (
               <div className="flex flex-col lg:flex-row justify-between items-center w-full gap-12">
                 {/* Image part - shown on the left in desktop */}
-                <div className="lg:w-1/3">
+                <div className="lg:w-1/4">
                   <div className="overflow-hidden rounded-2xl shadow-lg transition-transform duration-500 hover:scale-105">
                     <img
                       src={displayPost.post_image || defaultImage}
                       alt={displayPost.Title || "صورة المنشور"}
-                      className="w-full h-auto object-cover"
+                      className="w-full  object-cover"
                     />
                   </div>
                 </div>
