@@ -92,7 +92,7 @@ function PostContent() {
         <div className="p-6 md:p-8">
           {/* Category Badge */}
           <div className="mb-4" dir="rtl">
-            <span className="inline-block bg-blue-100 text-blue-800 rounded-full px-4 py-1 text-sm font-semibold">
+            <span className="inline-block bg-green-100 text-green-800 rounded-full px-4 py-1 text-sm font-semibold">
               {post.Category}
             </span>
           </div>
