@@ -27,7 +27,7 @@ export default function Card({
     <div className={` text-black ${className}  `}>
       {gender ? (
         <img
-          src={gender === "Female" ? womanPlaceholder.src : manPlaceholder.src}
+          src={gender === "female" ? womanPlaceholder.src : manPlaceholder.src}
           alt={`${name} placeholder`}
           height={300}
           width={300}

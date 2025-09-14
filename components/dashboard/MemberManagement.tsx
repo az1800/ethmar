@@ -188,7 +188,7 @@ export default function MemberManagement({
                           {/* {member.image ? ( */}
                           <img
                             src={
-                              member.Gender === "Female"
+                              member.Gender === "female"
                                 ? WomenPlaceHolder.src
                                 : menPlaceHolder.src
                             }
@@ -213,7 +213,7 @@ export default function MemberManagement({
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
                           <div className="text-sm text-gray-500 dark:text-gray-300">
-                            {member.Gender === "Female" ? "أنثى" : "ذكر"}
+                            {member.Gender === "female" ? "أنثى" : "ذكر"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

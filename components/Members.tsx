@@ -172,8 +172,8 @@ const Members: React.FC<MembersProps> = ({ type = "regular" }) => {
   }, []);
 
   // Extract the first 3 members from the entire dataset
-  const firstThreeMembers = cards.slice(0, 3);
-  const remainingMembers = cards.slice(3);
+  const firstThreeMembers = cards.slice(0, 1);
+  const remainingMembers = cards.slice(1);
 
   // Group the remaining members by committee
   const committees = remainingMembers.reduce(
