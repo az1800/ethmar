@@ -11,7 +11,7 @@ type PostData = {
   Title: string;
   Content: string;
   post_image: string;
-  Post_Link: string;
+  Post_Link: string | null;
 };
 
 // Create a separate component that uses useSearchParams
@@ -111,9 +111,36 @@ function PostContent() {
             dir="rtl"
             dangerouslySetInnerHTML={{ __html: post.Content }}
           />
-        </div>
+
+                    {post.Post_Link && (
+            <div className="mt-6 flex justify-end">
+              <a
+                href={encodeURI(post.Post_Link.trim())}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md bg-[#164B20] px-4 py-2 text-white transition hover:bg-[#126018]"
+              >
+               (PDF) عرض المرفق 
+              </a>
+            </div>
+          )}
+
+ 
+
+        </div> 
+{post.Post_Link && (
+  <iframe
+    src={`https://drive.google.com/viewerng/viewer?embedded=true&url=${encodeURIComponent(post.Post_Link)}`}
+    width="100%"
+    height="600px"
+    style={{ border: "none" }}
+    title="PDF Preview"
+  />
+)}
+
       </div>
     </div>
+    
   );
 }
 
@@ -131,3 +158,4 @@ export default function PostBody() {
     </Suspense>
   );
 }
+
