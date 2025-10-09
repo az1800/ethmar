@@ -12,7 +12,7 @@ type Post = {
   Title: string;
   Content: string;
   post_image: string;
-  Post_Link: string;
+  Post_Link: string | null;
 };
 
 type HeroProps = {
