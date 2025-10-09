@@ -64,27 +64,10 @@ export async function uploadPdfAndGetUrlAndPath(
  */
 export async function deleteByPath(path?: string | null) {
   if (!path) throw new Error("deleteByPath: empty path");
-
-  // robust normalization
-  const normalized = decodeURIComponent(path).trim().replace(/^\/+/, ""); // no leading slash
-
-  // attempt #1
-  let { data, error } = await supabase.storage.from("post-pdfs").remove([normalized]);
-  if (!error && data && data.length > 0) return data;
-
-  // (Optional) attempt #2: in case a stray "public/" or bucket prefix slipped in
-  // e.g., someone stored "storage/v1/object/public/post-pdfs/posts/..." by mistake
-  const maybeKeyOnly = normalized
-    .replace(/^storage\/v1\/object\/public\/post-pdfs\//, "")
-    .replace(/^post-pdfs\//, "");
-
-  if (maybeKeyOnly !== normalized) {
-    const res = await supabase.storage.from("post-pdfs").remove([maybeKeyOnly]);
-    if (!res.error && res.data && res.data.length > 0) return res.data;
-  }
-
-  // If we reach here, nothing was deleted — surface it for debugging
-  throw new Error(`Storage delete found no object at: "${normalized}"`);
+  const key = decodeURIComponent(path).trim().replace(/^\/+/, "");
+  const { data, error } = await supabase.storage.from("post-pdfs").remove([key]);
+  if (error) throw new Error(`Storage delete failed: ${error.message || JSON.stringify(error)}`);
+  return data; // FileObject[]
 }
 
 
