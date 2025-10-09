@@ -8,7 +8,7 @@ type PostProps = {
   Title: string;
   Content: string;
   post_image: string;
-  Post_Link: string;
+  Post_Link: string | null;
 };
 
 export default function PostCards({ post }: { post: PostProps }) {
@@ -74,6 +74,17 @@ export default function PostCards({ post }: { post: PostProps }) {
         >
           اقرأ المزيد
         </Link>
+                {post.Post_Link && (
+          <a
+            href={encodeURI(post.Post_Link.trim())}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm md:text-base text-[#164B20] underline"
+          >
+           (PDF) عرض المرفق
+
+          </a>
+        )}
       </div>
       <div className="w-full md:w-auto flex justify-center md:justify-end">
         <img
