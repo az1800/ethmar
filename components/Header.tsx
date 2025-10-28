@@ -24,7 +24,7 @@ export default function Header() {
           <SectionTitle title="الرئيسية" path="/" />
           <SectionTitle title="النشرات المالية" path="/blog" />
           <SectionTitle title="شركاء النجاح" path="/partners" />
-          <SectionTitle title="الهيكلة" path="/structure" />
+          {/* <SectionTitle title="الهيكلة" path="/structure" /> */}
           <SectionTitle title="إنجازاتنا" path="/acheivements" />
           {isAuthenticated && (
             <SectionTitle title="لوحة التحكم" path="/adminDashboard" />
@@ -120,7 +120,7 @@ export default function Header() {
           >
             شركاء النجاح
           </Link>
-          <Link
+          {/* <Link
             href="/structure"
             className="block text-black w-full mx-auto hover:bg-gray-100 py-2 transition-all duration-300 transform hover:translate-x-2"
             style={{
@@ -130,7 +130,7 @@ export default function Header() {
             }}
           >
             الهيكلة
-          </Link>
+          </Link> */}
           <Link
             href="/acheivements"
             className="block text-black w-full mx-auto hover:bg-gray-100 py-2 transition-all duration-300 transform hover:translate-x-2"
