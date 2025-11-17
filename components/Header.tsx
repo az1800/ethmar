@@ -143,6 +143,17 @@ export default function Header() {
           >
             إنجازاتنا
           </Link>
+          <Link
+            href="/contact"
+            className="block text-black w-full mx-auto hover:bg-gray-100 py-2 transition-all duration-300 transform hover:translate-x-2"
+            style={{
+              transitionDelay: open ? "550ms" : "0ms",
+              opacity: open ? 1 : 0,
+              transform: open ? "translateX(0)" : "translateX(-20px)",
+            }}
+          >
+            تواصل معنا
+          </Link>
           {isAuthenticated && (
             <Link
               href="/adminDashboard"
