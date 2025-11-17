@@ -24,9 +24,9 @@ export default function Header() {
           <SectionTitle title="الرئيسية" path="/" />
           <SectionTitle title="النشرات المالية" path="/blog" />
           <SectionTitle title="شركاء النجاح" path="/partners" />
-          <SectionTitle title="تواصل معنا" path="/contact" />
           {/* <SectionTitle title="الهيكلة" path="/structure" /> */}
           <SectionTitle title="إنجازاتنا" path="/acheivements" />
+          <SectionTitle title="تواصل معنا" path="/contact" />
           {isAuthenticated && (
             <SectionTitle title="لوحة التحكم" path="/adminDashboard" />
           )}
